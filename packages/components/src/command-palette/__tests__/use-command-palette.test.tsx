@@ -150,3 +150,65 @@ describe("useCommandPalette: keyboard nav", () => {
     expect(result.current.open).toBe(false);
   });
 });
+
+describe("useCommandPalette: nested pages (static children)", () => {
+  const nested: Command[] = [
+    {
+      id: "status",
+      label: "Change status",
+      children: [
+        { id: "todo", label: "Todo" },
+        { id: "done", label: "Done" },
+      ],
+    },
+    { id: "rename", label: "Rename" },
+  ];
+
+  it("selecting a command with children pushes a page", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands: nested }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("status"));
+    expect(result.current.pages).toHaveLength(2); // root + status
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["todo", "done"]);
+  });
+
+  it("pushing a page clears the query and resets the active item", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands: nested }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.setQuery("stat"));
+    act(() => result.current.select("status"));
+    expect(result.current.query).toBe("");
+    expect(result.current.activeId).toBe("todo");
+  });
+
+  it("popPage returns to the parent page", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands: nested }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("status"));
+    act(() => result.current.popPage());
+    expect(result.current.pages).toHaveLength(1);
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["status", "rename"]);
+  });
+
+  it("Escape pops a nested page instead of closing, then closes at root", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands: nested }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("status"));
+    act(() => result.current.onKeyDown(key("Escape"))); // pops
+    expect(result.current.open).toBe(true);
+    expect(result.current.pages).toHaveLength(1);
+    act(() => result.current.onKeyDown(key("Escape"))); // closes
+    expect(result.current.open).toBe(false);
+  });
+
+  it("closing resets the navigation stack to root", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands: nested }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("status"));
+    act(() => result.current.setOpen(false));
+    act(() => result.current.setOpen(true));
+    expect(result.current.pages).toHaveLength(1);
+  });
+});

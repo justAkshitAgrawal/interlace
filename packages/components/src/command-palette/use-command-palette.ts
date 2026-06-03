@@ -1,13 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useMemo, useState } from "react";
 import type {
   Command,
   CommandGroup,
+  Page,
   PaletteStatus,
   RankedCommand,
   RenderGroup,
@@ -21,39 +16,64 @@ export interface UseCommandPaletteOptions {
 
 export function useCommandPalette(options: UseCommandPaletteOptions) {
   const { commands, groups = [] } = options;
+  const rootPage = useMemo<Page>(
+    () => ({ parentCommandId: null, title: null, commands }),
+    [commands],
+  );
+
   const [open, setOpenState] = useState(false);
   const [query, setQueryState] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [stack, setStack] = useState<Page[]>([rootPage]);
 
-  const setOpen = useCallback((next: boolean) => {
-    setOpenState(next);
-    if (!next) {
-      setQueryState("");
-      setActiveIndex(0);
-    }
-  }, []);
+  const currentPage = stack[stack.length - 1] ?? rootPage;
+
+  const resetToRoot = useCallback(() => {
+    setQueryState("");
+    setActiveIndex(0);
+    setStack([rootPage]);
+  }, [rootPage]);
+
+  const setOpen = useCallback(
+    (next: boolean) => {
+      setOpenState(next);
+      if (!next) resetToRoot();
+    },
+    [resetToRoot],
+  );
 
   const setQuery = useCallback((q: string) => {
     setQueryState(q);
-    setActiveIndex(0); // reset highlight whenever the query changes
+    setActiveIndex(0);
+  }, []);
+
+  const pushPage = useCallback((page: Page) => {
+    setStack((s) => [...s, page]);
+    setQueryState("");
+    setActiveIndex(0);
+  }, []);
+
+  const popPage = useCallback(() => {
+    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+    setQueryState("");
+    setActiveIndex(0);
   }, []);
 
   const renderGroups = useMemo<RenderGroup[]>(
-    () => buildGroups(commands, groups, query),
-    [commands, groups, query],
+    () => buildGroups(currentPage.commands, groups, query),
+    [currentPage.commands, groups, query],
   );
 
-  // Flat, ordered list of visible items for index-based navigation.
   const flat = useMemo<RankedCommand[]>(
     () => renderGroups.flatMap((g) => g.items),
     [renderGroups],
   );
 
   const status = useMemo<PaletteStatus>(() => {
-    if (commands.length === 0) return "empty";
+    if (currentPage.commands.length === 0) return "empty";
     if (query === "") return "default";
     return flat.length > 0 ? "results" : "no-results";
-  }, [commands.length, flat.length, query]);
+  }, [currentPage.commands.length, flat.length, query]);
 
   const clampedIndex = flat.length === 0 ? -1 : Math.min(activeIndex, flat.length - 1);
   const activeId = clampedIndex >= 0 ? flat[clampedIndex]!.command.id : null;
@@ -62,20 +82,29 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
     (id: string) => {
       const cmd = flat.find((i) => i.command.id === id)?.command;
       if (!cmd) return;
+      if (Array.isArray(cmd.children)) {
+        pushPage({
+          parentCommandId: cmd.id,
+          title: cmd.label,
+          commands: cmd.children,
+        });
+        return;
+      }
       void cmd.onSelect?.();
     },
-    [flat],
+    [flat, pushPage],
   );
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (flat.length === 0 && e.key !== "Escape") return;
       switch (e.key) {
         case "ArrowDown":
+          if (flat.length === 0) return;
           e.preventDefault();
           setActiveIndex((i) => (i + 1) % flat.length);
           break;
         case "ArrowUp":
+          if (flat.length === 0) return;
           e.preventDefault();
           setActiveIndex((i) => (i - 1 + flat.length) % flat.length);
           break;
@@ -85,11 +114,12 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
           break;
         case "Escape":
           e.preventDefault();
-          setOpen(false);
+          if (stack.length > 1) popPage();
+          else setOpen(false);
           break;
       }
     },
-    [flat.length, activeId, select, setOpen],
+    [flat.length, activeId, select, stack.length, popPage, setOpen],
   );
 
   const setActiveId = useCallback(
@@ -111,6 +141,8 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
     setActiveId,
     onKeyDown,
     select,
+    pages: stack,
+    popPage,
   };
 }
 
