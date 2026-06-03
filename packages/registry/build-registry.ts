@@ -1,8 +1,12 @@
 import { readFileSync, readdirSync, mkdirSync, writeFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const here = fileURLToPath(new URL(".", import.meta.url));
+// NOTE: use dirname(fileURLToPath(import.meta.url)) rather than
+// fileURLToPath(new URL(".", import.meta.url)) — Vite (vitest) rewrites the
+// `new URL(..., import.meta.url)` pattern to a dev-server http:// URL, which
+// breaks fileURLToPath when the module is imported under test.
+const here = dirname(fileURLToPath(import.meta.url));
 const COMPONENTS_DIR = join(here, "..", "components", "src");
 const OUT_DIR = join(here, "..", "..", "apps", "showcase", "public", "r");
 
@@ -29,7 +33,7 @@ function listSourceFiles(dir: string): string[] {
     .sort();
 }
 
-function buildComponent(name: string) {
+export function buildComponent(name: string) {
   const dir = join(COMPONENTS_DIR, name);
   const files = listSourceFiles(dir).map((file) => ({
     path: `${name}/${file}`,
@@ -61,4 +65,7 @@ function main() {
   }
 }
 
-main();
+// Only run when invoked directly (not when imported by tests).
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}
