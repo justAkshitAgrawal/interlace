@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useCommandPalette } from "../use-command-palette";
 import type { Command } from "../types";
 
@@ -210,5 +210,91 @@ describe("useCommandPalette: nested pages (static children)", () => {
     act(() => result.current.setOpen(false));
     act(() => result.current.setOpen(true));
     expect(result.current.pages).toHaveLength(1);
+  });
+});
+
+function deferred<T>() {
+  let resolve!: (v: T) => void;
+  let reject!: (e: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+describe("useCommandPalette: async children", () => {
+  it("enters 'loading' while an async child resolver is pending", async () => {
+    const d = deferred<Command[]>();
+    const cmds: Command[] = [
+      { id: "people", label: "Assign person", children: () => d.promise },
+    ];
+    const { result } = renderHook(() => useCommandPalette({ commands: cmds }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("people"));
+    expect(result.current.status).toBe("loading");
+
+    await act(async () => {
+      d.resolve([{ id: "alice", label: "Alice" }]);
+      await d.promise;
+    });
+
+    await waitFor(() => expect(result.current.status).toBe("results"));
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["alice"]);
+  });
+
+  it("drops a stale async response when a newer request supersedes it", async () => {
+    const first = deferred<Command[]>();
+    const second = deferred<Command[]>();
+    let call = 0;
+    const cmds: Command[] = [
+      {
+        id: "people",
+        label: "Assign person",
+        children: () => (call++ === 0 ? first.promise : second.promise),
+      },
+    ];
+    const { result } = renderHook(() => useCommandPalette({ commands: cmds }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("people")); // request #1 (pending)
+    act(() => result.current.popPage());
+    act(() => result.current.select("people")); // request #2 (pending)
+
+    await act(async () => {
+      second.resolve([{ id: "bob", label: "Bob" }]);
+      first.resolve([{ id: "STALE", label: "Stale" }]); // resolves later, must be ignored
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(result.current.status).toBe("results"));
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["bob"]);
+  });
+
+  it("enters 'error' when an async resolver rejects, and retry re-runs it", async () => {
+    let call = 0;
+    const ok = deferred<Command[]>();
+    const cmds: Command[] = [
+      {
+        id: "people",
+        label: "Assign person",
+        children: () =>
+          call++ === 0 ? Promise.reject(new Error("boom")) : ok.promise,
+      },
+    ];
+    const { result } = renderHook(() => useCommandPalette({ commands: cmds }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("people"));
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+    expect(result.current.error?.message).toBe("boom");
+
+    act(() => result.current.retry());
+    await act(async () => {
+      ok.resolve([{ id: "carol", label: "Carol" }]);
+      await ok.promise;
+    });
+    await waitFor(() => expect(result.current.status).toBe("results"));
   });
 });
