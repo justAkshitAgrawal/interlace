@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync, mkdirSync, writeFileSync, statSync } from "node:fs";
 import { join, relative, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 // NOTE: use dirname(fileURLToPath(import.meta.url)) rather than
 // fileURLToPath(new URL(".", import.meta.url)) — Vite (vitest) rewrites the
@@ -66,6 +66,8 @@ function main() {
 }
 
 // Only run when invoked directly (not when imported by tests).
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL percent-encodes spaces / non-ASCII so this matches even on
+// paths a naive `file://${process.argv[1]}` concat would miss.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }
