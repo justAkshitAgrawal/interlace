@@ -37,3 +37,51 @@ describe("useCommandPalette: open/close + query", () => {
     expect(result.current.query).toBe("");
   });
 });
+
+describe("useCommandPalette: groups + status", () => {
+  it("status is 'default' when open with an empty query", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    expect(result.current.status).toBe("default");
+  });
+
+  it("groups all commands under their labels for an empty query", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    expect(result.current.groups.map((g) => g.id)).toEqual(["actions", "nav"]);
+    expect(result.current.groups[0]!.items.map((i) => i.command.id)).toEqual([
+      "new",
+      "open",
+    ]);
+  });
+
+  it("status is 'results' and groups filter when query matches", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.setQuery("set"));
+    expect(result.current.status).toBe("results");
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["settings"]);
+  });
+
+  it("hides groups that have no matches", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.setQuery("set"));
+    expect(result.current.groups.map((g) => g.id)).toEqual(["nav"]);
+  });
+
+  it("status is 'no-results' when nothing matches", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.setQuery("zzzzz"));
+    expect(result.current.status).toBe("no-results");
+    expect(result.current.groups).toHaveLength(0);
+  });
+
+  it("status is 'empty' when there are no commands at all", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands: [], groups }));
+    act(() => result.current.setOpen(true));
+    expect(result.current.status).toBe("empty");
+  });
+});
