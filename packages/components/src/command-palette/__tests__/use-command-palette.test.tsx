@@ -85,3 +85,68 @@ describe("useCommandPalette: groups + status", () => {
     expect(result.current.status).toBe("empty");
   });
 });
+
+function key(k: string, extra: Partial<KeyboardEvent> = {}) {
+  return {
+    key: k,
+    preventDefault: vi.fn(),
+    ...extra,
+  } as unknown as React.KeyboardEvent;
+}
+
+describe("useCommandPalette: keyboard nav", () => {
+  it("activates the first visible item by default", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    expect(result.current.activeId).toBe("new");
+  });
+
+  it("ArrowDown moves to the next flat item across groups", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.onKeyDown(key("ArrowDown"))); // new -> open
+    expect(result.current.activeId).toBe("open");
+    act(() => result.current.onKeyDown(key("ArrowDown"))); // open -> settings
+    expect(result.current.activeId).toBe("settings");
+  });
+
+  it("ArrowDown wraps from last to first", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.onKeyDown(key("ArrowDown")));
+    act(() => result.current.onKeyDown(key("ArrowDown")));
+    act(() => result.current.onKeyDown(key("ArrowDown"))); // wrap
+    expect(result.current.activeId).toBe("new");
+  });
+
+  it("ArrowUp wraps from first to last", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.onKeyDown(key("ArrowUp")));
+    expect(result.current.activeId).toBe("settings");
+  });
+
+  it("active item resets to first when the query changes", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.onKeyDown(key("ArrowDown")));
+    act(() => result.current.setQuery("o")); // matches "New File"(o? no) -> "Open File"
+    expect(result.current.activeId).toBe(result.current.groups[0]!.items[0]!.command.id);
+  });
+
+  it("Enter runs the active command's onSelect", () => {
+    const onSelect = vi.fn();
+    const cmds: Command[] = [{ id: "go", label: "Go", onSelect }];
+    const { result } = renderHook(() => useCommandPalette({ commands: cmds }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.onKeyDown(key("Enter")));
+    expect(onSelect).toHaveBeenCalledOnce();
+  });
+
+  it("Escape closes the palette", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.onKeyDown(key("Escape")));
+    expect(result.current.open).toBe(false);
+  });
+});
