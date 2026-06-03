@@ -297,4 +297,51 @@ describe("useCommandPalette: async children", () => {
     });
     await waitFor(() => expect(result.current.status).toBe("results"));
   });
+
+  it("ignores a pending async response after the palette is closed", async () => {
+    const d = deferred<Command[]>();
+    const cmds: Command[] = [
+      { id: "root-a", label: "Root A" },
+      { id: "people", label: "Assign person", children: () => d.promise },
+    ];
+    const { result } = renderHook(() => useCommandPalette({ commands: cmds }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("people")); // async request in flight
+    expect(result.current.status).toBe("loading");
+
+    act(() => result.current.setOpen(false)); // close while pending
+
+    // The stale resolution arrives after close — it must be ignored.
+    await act(async () => {
+      d.resolve([{ id: "STALE", label: "Stale" }]);
+      await d.promise;
+    });
+
+    // Reopen: root page must be intact, not overwritten by the stale children.
+    act(() => result.current.setOpen(true));
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["root-a", "people"]);
+    expect(result.current.status).toBe("default");
+  });
+
+  it("ignores a pending async response after popPage", async () => {
+    const d = deferred<Command[]>();
+    const cmds: Command[] = [
+      { id: "root-a", label: "Root A" },
+      { id: "people", label: "Assign person", children: () => d.promise },
+    ];
+    const { result } = renderHook(() => useCommandPalette({ commands: cmds }));
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("people")); // async request in flight (pushes placeholder)
+    act(() => result.current.popPage()); // abandon it, back to root
+
+    await act(async () => {
+      d.resolve([{ id: "STALE", label: "Stale" }]);
+      await d.promise;
+    });
+
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["root-a", "people"]);
+    expect(result.current.status).toBe("default");
+  });
 });
