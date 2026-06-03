@@ -28,7 +28,7 @@ export function CommandPalette({
   placeholder = "Type a command or search…",
   disableShortcut = false,
 }: CommandPaletteProps) {
-  const palette = useCommandPalette({ commands, groups });
+  const palette = useCommandPalette({ commands, groups, onOpenChange });
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);

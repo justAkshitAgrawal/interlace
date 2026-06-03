@@ -211,6 +211,32 @@ describe("useCommandPalette: nested pages (static children)", () => {
     act(() => result.current.setOpen(true));
     expect(result.current.pages).toHaveLength(1);
   });
+
+  it("calls onOpenChange when Escape closes at root", () => {
+    const onOpenChange = vi.fn();
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, onOpenChange }),
+    );
+    act(() => result.current.setOpen(true));
+    onOpenChange.mockClear();
+    act(() => result.current.onKeyDown(key("Escape")));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("does not call onOpenChange to close when Escape pops a nested page", () => {
+    const onOpenChange = vi.fn();
+    const nested: Command[] = [
+      { id: "status", label: "Change status", children: [{ id: "todo", label: "Todo" }] },
+    ];
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands: nested, onOpenChange }),
+    );
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("status")); // push nested page
+    onOpenChange.mockClear();
+    act(() => result.current.onKeyDown(key("Escape"))); // pops, does NOT close
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
 });
 
 function deferred<T>() {

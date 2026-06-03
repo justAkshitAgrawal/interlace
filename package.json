@@ -4,7 +4,7 @@
   "packageManager": "pnpm@9.12.3",
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test",
+    "test": "vitest run",
     "lint": "turbo run lint",
     "registry": "turbo run registry"
   },

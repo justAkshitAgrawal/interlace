@@ -18,6 +18,8 @@ import { rankCommands } from "./fuzzy";
 export interface UseCommandPaletteOptions {
   commands: Command[];
   groups?: CommandGroup[];
+  /** Notified whenever the hook changes its open state (e.g. Escape at root). */
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface AsyncState {
@@ -31,7 +33,7 @@ interface AsyncState {
 }
 
 export function useCommandPalette(options: UseCommandPaletteOptions) {
-  const { commands, groups = [] } = options;
+  const { commands, groups = [], onOpenChange } = options;
   const rootPage = useMemo<Page>(
     () => ({ parentCommandId: null, title: null, commands }),
     [commands],
@@ -65,8 +67,9 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
     (next: boolean) => {
       setOpenState(next);
       if (!next) resetToRoot();
+      onOpenChange?.(next);
     },
-    [resetToRoot],
+    [resetToRoot, onOpenChange],
   );
 
   const setQuery = useCallback((q: string) => {
