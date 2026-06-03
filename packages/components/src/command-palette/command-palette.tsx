@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-} from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Command, CommandGroup } from "./types";
 import { useCommandPalette } from "./use-command-palette";
 import { DURATION, EASING, PANEL_SPRING } from "./motion";
@@ -18,6 +14,8 @@ export interface CommandPaletteProps {
   placeholder?: string;
   /** Disable the built-in ⌘K / Ctrl+K global shortcut (e.g. in demos). */
   disableShortcut?: boolean;
+  /** Opens the palette pre-filtered with this query. */
+  defaultQuery?: string;
 }
 
 export function CommandPalette({
@@ -27,8 +25,9 @@ export function CommandPalette({
   onOpenChange,
   placeholder = "Type a command or search…",
   disableShortcut = false,
+  defaultQuery,
 }: CommandPaletteProps) {
-  const palette = useCommandPalette({ commands, groups, onOpenChange });
+  const palette = useCommandPalette({ commands, groups, onOpenChange, defaultQuery });
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -133,12 +132,14 @@ export function CommandPalette({
                 </li>
               )}
               {palette.status === "error" && (
-                <li className="px-3 py-6 text-center text-sm text-red-500">
-                  {palette.error?.message ?? "Something went wrong."}{" "}
+                <li className="flex flex-col items-center gap-3 px-3 py-8 text-center">
+                  <span className="text-sm text-red-500 dark:text-red-400">
+                    {palette.error?.message ?? "Something went wrong."}
+                  </span>
                   <button
                     type="button"
                     onClick={() => palette.retry()}
-                    className="underline"
+                    className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   >
                     Retry
                   </button>
@@ -201,13 +202,7 @@ export function CommandPalette({
   );
 }
 
-function Highlight({
-  text,
-  indices,
-}: {
-  text: string;
-  indices: number[];
-}) {
+function Highlight({ text, indices }: { text: string; indices: number[] }) {
   if (indices.length === 0) return <span>{text}</span>;
   const set = new Set(indices);
   return (

@@ -371,3 +371,46 @@ describe("useCommandPalette: async children", () => {
     expect(result.current.status).toBe("default");
   });
 });
+
+describe("useCommandPalette: defaultQuery", () => {
+  it("initializes the query from defaultQuery", () => {
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, defaultQuery: "set" }),
+    );
+    expect(result.current.query).toBe("set");
+  });
+
+  it("filters to matching results on mount when defaultQuery is set", () => {
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, defaultQuery: "set" }),
+    );
+    act(() => result.current.setOpen(true));
+    expect(result.current.status).toBe("results");
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids).toEqual(["settings"]);
+  });
+
+  it("reports no-results on mount when defaultQuery matches nothing", () => {
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, defaultQuery: "zzzzz" }),
+    );
+    act(() => result.current.setOpen(true));
+    expect(result.current.status).toBe("no-results");
+  });
+
+  it("restores defaultQuery (not empty) after the palette closes", () => {
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, defaultQuery: "set" }),
+    );
+    act(() => result.current.setOpen(true));
+    act(() => result.current.setQuery("other"));
+    expect(result.current.query).toBe("other");
+    act(() => result.current.setOpen(false)); // resetToRoot
+    expect(result.current.query).toBe("set");
+  });
+
+  it("defaults to an empty query when defaultQuery is omitted", () => {
+    const { result } = renderHook(() => useCommandPalette({ commands, groups }));
+    expect(result.current.query).toBe("");
+  });
+});

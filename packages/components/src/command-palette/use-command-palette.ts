@@ -20,6 +20,8 @@ export interface UseCommandPaletteOptions {
   groups?: CommandGroup[];
   /** Notified whenever the hook changes its open state (e.g. Escape at root). */
   onOpenChange?: (open: boolean) => void;
+  /** Opens the palette pre-filtered with this query. */
+  defaultQuery?: string;
 }
 
 interface AsyncState {
@@ -33,14 +35,14 @@ interface AsyncState {
 }
 
 export function useCommandPalette(options: UseCommandPaletteOptions) {
-  const { commands, groups = [], onOpenChange } = options;
+  const { commands, groups = [], onOpenChange, defaultQuery } = options;
   const rootPage = useMemo<Page>(
     () => ({ parentCommandId: null, title: null, commands }),
     [commands],
   );
 
   const [open, setOpenState] = useState(false);
-  const [query, setQueryState] = useState("");
+  const [query, setQueryState] = useState(defaultQuery ?? "");
   const [activeIndex, setActiveIndex] = useState(0);
   const [stack, setStack] = useState<Page[]>([rootPage]);
   const [asyncState, setAsyncState] = useState<AsyncState>({
@@ -57,11 +59,11 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
 
   const resetToRoot = useCallback(() => {
     reqCounter.current++;
-    setQueryState("");
+    setQueryState(defaultQuery ?? "");
     setActiveIndex(0);
     setStack([rootPage]);
     setAsyncState({ pendingReqId: null, error: null, resolver: null, resolved: false });
-  }, [rootPage]);
+  }, [rootPage, defaultQuery]);
 
   const setOpen = useCallback(
     (next: boolean) => {
