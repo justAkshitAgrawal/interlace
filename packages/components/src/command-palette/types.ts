@@ -10,6 +10,8 @@ export interface Command {
   label: string;
   /** Extra terms that should match fuzzy search but aren't shown. */
   keywords?: string[];
+  /** Shortcut hint shown right-aligned on the row. Display-only; not bound to keys. */
+  shortcut?: string[];
   /** Group id this command belongs to. Ungrouped if omitted. */
   group?: string;
   icon?: ReactNode;
@@ -53,3 +55,10 @@ export interface RankedCommand {
   /** Char indices in `label` that matched, for highlighting. */
   matchedIndices: number[];
 }
+
+/** Filters + orders commands and reports match indices. The single ranking surface. */
+export type RankFn = (
+  commands: Command[],
+  query: string,
+  recents?: string[],
+) => RankedCommand[];
