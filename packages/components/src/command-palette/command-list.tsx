@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { RenderGroup } from "./types";
 
@@ -110,7 +110,7 @@ function VirtualList({
   onActivate: (id: string) => void;
   onSelect: (id: string) => void;
 }) {
-  const parentRef = useRef<HTMLUListElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -141,10 +141,16 @@ function VirtualList({
   });
 
   const activeIndex = rows.findIndex((r) => r.kind === "item" && r.id === activeId);
-  if (activeIndex >= 0) virtualizer.scrollToIndex(activeIndex);
+  // Keep the active row scrolled into view (effect, not during render).
+  useEffect(() => {
+    if (activeIndex >= 0) virtualizer.scrollToIndex(activeIndex);
+  }, [activeIndex, virtualizer]);
 
+  // The virtualized rows are absolutely positioned inside a sized spacer, so
+  // this path uses role-annotated <div>s rather than <ul>/<li> — a <div> spacer
+  // is not a valid child of <ul>, and the option <div>s carry role="option".
   return (
-    <ul
+    <div
       ref={parentRef}
       id={listId}
       role="listbox"
@@ -152,7 +158,7 @@ function VirtualList({
     >
       <div
         role="presentation"
-        style={{ height: virtualizer.getTotalSize(), position: "relative", listStyle: "none" }}
+        style={{ height: virtualizer.getTotalSize(), position: "relative" }}
       >
         {virtualizer.getVirtualItems().map((vi) => {
           const row = rows[vi.index]!;
@@ -166,6 +172,7 @@ function VirtualList({
           return row.kind === "header" ? (
             <div
               key={row.key}
+              role="presentation"
               style={style}
               className="px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-zinc-400"
             >
@@ -174,6 +181,7 @@ function VirtualList({
           ) : (
             <Item
               key={row.key}
+              as="div"
               listId={listId}
               row={row}
               active={row.id === activeId}
@@ -184,11 +192,12 @@ function VirtualList({
           );
         })}
       </div>
-    </ul>
+    </div>
   );
 }
 
 function Item({
+  as: Tag = "li",
   listId,
   row,
   active,
@@ -196,6 +205,10 @@ function Item({
   onSelect,
   style,
 }: {
+  /** Element to render as. Plain list uses <li>; the virtualized list uses
+   *  <div> so the absolutely-positioned rows are valid children of a
+   *  role="listbox" container (a <div> is not a valid child of <ul>). */
+  as?: "li" | "div";
   listId: string;
   row: Extract<Row, { kind: "item" }>;
   active: boolean;
@@ -204,7 +217,7 @@ function Item({
   style?: React.CSSProperties;
 }) {
   return (
-    <li
+    <Tag
       id={`${listId}-${row.id}`}
       role="option"
       aria-selected={active}
@@ -230,7 +243,7 @@ function Item({
           ))}
         </span>
       )}
-    </li>
+    </Tag>
   );
 }
 
