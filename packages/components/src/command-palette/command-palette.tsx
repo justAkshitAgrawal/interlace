@@ -81,11 +81,13 @@ export function CommandPalette({
   }, [open, onOpenChange, disableShortcut]);
 
   // Focus the input on open; restore focus to the trigger on close.
+  // preventScroll: the overlay is fixed + centered, so focusing must not yank
+  // the page (e.g. a palette that opens on mount would otherwise scroll to it).
   useEffect(() => {
     if (open) {
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
     } else {
-      triggerRef.current?.focus?.();
+      triggerRef.current?.focus?.({ preventScroll: true });
     }
   }, [open]);
 
