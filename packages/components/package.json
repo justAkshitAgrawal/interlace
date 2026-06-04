@@ -1,0 +1,21 @@
+{
+  "name": "@interlace/components",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./command-palette": "./src/command-palette/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.14.2",
+    "framer-motion": "^11.11.0"
+  }
+}

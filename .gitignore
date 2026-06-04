@@ -4,3 +4,12 @@ dist/
 .turbo/
 .DS_Store
 *.log
+*.tsbuildinfo
+
+# AI tooling scaffolding (not part of the product)
+.agents/
+.claude/
+.cursor/
+.gemini/
+.kiro/
+.qoder/
