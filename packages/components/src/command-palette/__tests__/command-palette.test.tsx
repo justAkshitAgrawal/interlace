@@ -119,3 +119,48 @@ describe("CommandPalette: shortcut hints", () => {
     expect(screen.getByRole("option").querySelector("kbd")).toBeNull();
   });
 });
+
+describe("CommandPalette: virtualization", () => {
+  function makeCommands(n: number): Command[] {
+    return Array.from({ length: n }, (_, i) => ({
+      id: `cmd-${i}`,
+      label: `Command number ${i}`,
+    }));
+  }
+
+  it("renders every row for a small list (below threshold)", () => {
+    function H() {
+      const [open, setOpen] = useState(true);
+      return (
+        <CommandPalette commands={makeCommands(20)} open={open} onOpenChange={setOpen} disableShortcut />
+      );
+    }
+    render(<H />);
+    expect(screen.getAllByRole("option").length).toBe(20);
+  });
+
+  it("renders only a window of rows for a large list (above threshold)", () => {
+    function H() {
+      const [open, setOpen] = useState(true);
+      return (
+        <CommandPalette commands={makeCommands(2000)} open={open} onOpenChange={setOpen} disableShortcut />
+      );
+    }
+    render(<H />);
+    const rendered = screen.getAllByRole("option").length;
+    expect(rendered).toBeGreaterThan(0);
+    expect(rendered).toBeLessThan(2000);
+  });
+
+  it("has no axe violations with a virtualized list", async () => {
+    function H() {
+      const [open, setOpen] = useState(true);
+      return (
+        <CommandPalette commands={makeCommands(2000)} open={open} onOpenChange={setOpen} disableShortcut />
+      );
+    }
+    const { container } = render(<H />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+});

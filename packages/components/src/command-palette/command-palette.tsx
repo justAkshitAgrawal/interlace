@@ -4,6 +4,7 @@ import { useEffect, useId, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Command, CommandGroup, RankFn } from "./types";
 import { useCommandPalette } from "./use-command-palette";
+import { CommandList } from "./command-list";
 import { DURATION, EASING, PANEL_SPRING } from "./motion";
 
 export interface CommandPaletteProps {
@@ -138,17 +139,23 @@ export function CommandPalette({
               }
               className="w-full border-b border-zinc-200 bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-zinc-400 dark:border-zinc-800"
             />
-            <ul
-              id={listId}
-              role="listbox"
-              className="max-h-80 overflow-y-auto p-2"
-            >
-              {palette.status === "loading" && (
+            {palette.status === "loading" && (
+              <ul
+                id={listId}
+                role="listbox"
+                className="max-h-80 overflow-y-auto p-2"
+              >
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   Loading…
                 </li>
-              )}
-              {palette.status === "error" && (
+              </ul>
+            )}
+            {palette.status === "error" && (
+              <ul
+                id={listId}
+                role="listbox"
+                className="max-h-80 overflow-y-auto p-2"
+              >
                 <li className="flex flex-col items-center gap-3 px-3 py-8 text-center">
                   <span className="text-sm text-red-500 dark:text-red-400">
                     {palette.error?.message ?? "Something went wrong."}
@@ -161,93 +168,42 @@ export function CommandPalette({
                     Retry
                   </button>
                 </li>
-              )}
-              {palette.status === "no-results" && (
+              </ul>
+            )}
+            {palette.status === "no-results" && (
+              <ul
+                id={listId}
+                role="listbox"
+                className="max-h-80 overflow-y-auto p-2"
+              >
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   No results for “{palette.query}”.
                 </li>
-              )}
-              {palette.status === "empty" && (
+              </ul>
+            )}
+            {palette.status === "empty" && (
+              <ul
+                id={listId}
+                role="listbox"
+                className="max-h-80 overflow-y-auto p-2"
+              >
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   Nothing here yet.
                 </li>
-              )}
-              {(palette.status === "default" || palette.status === "results") &&
-                palette.groups.map((group) => (
-                  <li key={group.id} role="presentation">
-                    {group.label && (
-                      <div className="px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
-                        {group.label}
-                      </div>
-                    )}
-                    <ul role="presentation">
-                      {group.items.map((item) => {
-                        const active = item.command.id === palette.activeId;
-                        return (
-                          <li
-                            key={item.command.id}
-                            id={`${listId}-${item.command.id}`}
-                            role="option"
-                            aria-selected={active}
-                            onMouseEnter={() =>
-                              palette.setActiveId(item.command.id)
-                            }
-                            onClick={() => palette.select(item.command.id)}
-                            className={[
-                              "flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm",
-                              active
-                                ? "bg-zinc-100 dark:bg-zinc-800"
-                                : "text-zinc-700 dark:text-zinc-300",
-                            ].join(" ")}
-                          >
-                            {item.command.icon}
-                            <Highlight
-                              text={item.command.label}
-                              indices={item.matchedIndices}
-                            />
-                            {item.command.shortcut && (
-                              <span className="ml-auto flex items-center gap-1">
-                                {item.command.shortcut.map((token, i) => (
-                                  <kbd
-                                    key={i}
-                                    className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
-                                  >
-                                    {token}
-                                  </kbd>
-                                ))}
-                              </span>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </li>
-                ))}
-            </ul>
+              </ul>
+            )}
+            {(palette.status === "default" || palette.status === "results") && (
+              <CommandList
+                listId={listId}
+                groups={palette.groups}
+                activeId={palette.activeId}
+                onActivate={palette.setActiveId}
+                onSelect={palette.select}
+              />
+            )}
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-function Highlight({ text, indices }: { text: string; indices: number[] }) {
-  if (indices.length === 0) return <span>{text}</span>;
-  const set = new Set(indices);
-  return (
-    <span>
-      {text.split("").map((ch, i) =>
-        set.has(i) ? (
-          <mark
-            key={i}
-            className="bg-transparent font-semibold text-zinc-900 dark:text-white"
-          >
-            {ch}
-          </mark>
-        ) : (
-          <span key={i}>{ch}</span>
-        ),
-      )}
-    </span>
   );
 }
