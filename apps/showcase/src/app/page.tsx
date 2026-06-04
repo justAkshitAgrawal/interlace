@@ -6,6 +6,7 @@ import { demoCommands, demoGroups } from "@/lib/demo-commands";
 import { InstallCommand } from "@/components/install-command";
 import { RaceTimeline } from "@/components/race-timeline";
 import { NestingDemo } from "@/components/nesting-demo";
+import { RecentsDemo } from "@/components/recents-demo";
 import { StateInspector } from "@/components/state-inspector";
 import { MotionReadout } from "@/components/motion-readout";
 import { ScaleDemo } from "@/components/scale-demo";
@@ -68,6 +69,18 @@ export default function Home() {
         />
         <div className="mt-7">
           <NestingDemo />
+        </div>
+      </section>
+
+      {/* Recents + shortcut hints. */}
+      <section id="recents" className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8">
+        <SectionLabel
+          kicker="Recents · shortcut hints"
+          title="Remembers what you use, and shows the keys"
+          body="Recently-used commands float to the top; shortcut hints render inline. Two conveniences every great palette has — and ours gives you for free."
+        />
+        <div className="mt-7">
+          <RecentsDemo />
         </div>
       </section>
 
