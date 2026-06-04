@@ -53,7 +53,7 @@ importers:
 
   apps/showcase:
     dependencies:
-      '@palettekit/components':
+      '@interlace/components':
         specifier: workspace:*
         version: link:../../packages/components
       framer-motion:

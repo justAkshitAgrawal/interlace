@@ -6,7 +6,7 @@ import {
   DURATION,
   EASING,
   PANEL_SPRING,
-} from "@palettekit/components/command-palette";
+} from "@interlace/components/command-palette";
 
 /*
  * The palette's timings live in motion.ts as real exported tokens. This reads

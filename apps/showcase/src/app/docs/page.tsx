@@ -58,8 +58,9 @@ export default function Docs() {
         One command, source you own
       </h1>
       <p className="mt-3 max-w-xl text-pretty leading-relaxed text-muted">
-        PaletteKit installs as source into your repo via the shadcn CLI. You own
-        the files and edit the styling freely.
+        Interlace components install as source into your repo via the shadcn
+        CLI. You own the files and edit the styling freely. Requires React 19 and
+        Tailwind CSS.
       </p>
       <div className="mt-7">
         <InstallCommand />

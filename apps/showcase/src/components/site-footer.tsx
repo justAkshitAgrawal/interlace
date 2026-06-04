@@ -7,9 +7,9 @@ export function SiteFooter() {
         <div className="flex items-center gap-2 text-sm">
           <span className="font-mono text-accent">⌘</span>
           <span className="font-semibold">
-            Palette<span className="text-accent">Kit</span>
+            Inter<span className="text-accent">lace</span>
           </span>
-          <span className="ml-2 text-faint">The command palette that doesn&apos;t suck.</span>
+          <span className="ml-2 text-faint">Drop-in interactions for real software.</span>
         </div>
         <div className="flex items-center gap-5 text-sm text-muted">
           <Link href="/#studio" className="transition-colors hover:text-ink">
@@ -19,7 +19,7 @@ export function SiteFooter() {
             Docs
           </Link>
           <a
-            href="https://github.com/palettekit/palettekit"
+            href="https://github.com/akshitagrawal/interlace"
             target="_blank"
             rel="noreferrer"
             className="transition-colors hover:text-ink"

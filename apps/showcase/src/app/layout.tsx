@@ -18,9 +18,9 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title:
-    "PaletteKit: watch what a great command palette does that a bad one doesn't",
+    "Interlace: watch what a great command palette does that a bad one doesn't",
   description:
-    "A best-in-class, copy-paste command palette for React. Async with race cancellation, nested pages, accessible. See the dropped requests and frozen states most palettes hide. Free.",
+    "Drop-in interactions for real software. The first is a best-in-class, copy-paste command palette for React — async with race cancellation, nested pages, accessible. See the dropped requests and frozen states most palettes hide. Free.",
 };
 
 export default function RootLayout({

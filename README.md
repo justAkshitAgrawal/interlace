@@ -16,7 +16,7 @@ npx shadcn@latest add https://palettekit.dev/r/command-palette.json
 pnpm install
 pnpm test     # run all tests
 pnpm build    # typecheck + build registry + build showcase
-pnpm --filter @palettekit/showcase dev   # run the showcase locally
+pnpm --filter @interlace/showcase dev   # run the showcase locally
 ```
 
 ## Structure

@@ -1,16 +1,16 @@
 {
-  "name": "@palettekit/showcase",
+  "name": "@interlace/showcase",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "pnpm --filter @palettekit/registry registry",
+    "prebuild": "pnpm --filter @interlace/registry registry",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@palettekit/components": "workspace:*",
+    "@interlace/components": "workspace:*",
     "framer-motion": "^11.11.0",
     "next": "^15.1.0",
     "react": "^19.0.0",

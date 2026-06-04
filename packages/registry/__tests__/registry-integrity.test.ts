@@ -9,7 +9,7 @@ const OUT = join(ROOT, "apps", "showcase", "public", "r", "command-palette.json"
 describe("registry integrity: command-palette.json", () => {
   beforeAll(() => {
     // Regenerate to guarantee we test current source, not a stale artifact.
-    execFileSync("pnpm", ["--filter", "@palettekit/registry", "registry"], {
+    execFileSync("pnpm", ["--filter", "@interlace/registry", "registry"], {
       cwd: ROOT,
       stdio: "ignore",
     });

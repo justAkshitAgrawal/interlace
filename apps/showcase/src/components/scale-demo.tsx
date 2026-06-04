@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CommandPalette } from "@palettekit/components/command-palette";
-import type { Command } from "@palettekit/components/command-palette";
+import { CommandPalette } from "@interlace/components/command-palette";
+import type { Command } from "@interlace/components/command-palette";
 
 /*
  * Loads the real palette with 5,000 commands to show virtualization: only the

@@ -223,7 +223,7 @@ export function RaceTimeline() {
           <>
             <span className="text-ink">The slow request loses.</span> When the
             faster <code className="font-mono text-accent">&quot;as&quot;</code>{" "}
-            response arrives, PaletteKit advances a monotonic request id. The
+            response arrives, Interlace advances a monotonic request id. The
             older <code className="font-mono text-stale">&quot;a&quot;</code>{" "}
             response resolves later, sees its id is stale, and is dropped before
             it can touch the UI.
@@ -236,7 +236,7 @@ export function RaceTimeline() {
             response lands after{" "}
             <code className="font-mono">&quot;as&quot;</code> and clobbers it:
             the list now shows results for a query the user already moved past.
-            Flip back to PaletteKit to watch the same race resolve correctly.
+            Flip back to Interlace to watch the same race resolve correctly.
           </>
         )}
       </p>
@@ -252,7 +252,7 @@ function ModeToggle({
   onChange: (m: Mode) => void;
 }) {
   const options: { id: Mode; label: string }[] = [
-    { id: "palettekit", label: "PaletteKit" },
+    { id: "palettekit", label: "Interlace" },
     { id: "naive", label: "Naive palette" },
   ];
   return (

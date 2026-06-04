@@ -13,13 +13,13 @@ export function SiteHeader() {
         <Link
           href="/"
           className="group flex items-center gap-2 text-sm font-semibold tracking-tight"
-          aria-label="PaletteKit home"
+          aria-label="Interlace home"
         >
           <span className="font-mono text-accent transition-transform group-hover:-translate-y-px">
             ⌘
           </span>
           <span>
-            Palette<span className="text-accent">Kit</span>
+            Inter<span className="text-accent">lace</span>
           </span>
         </Link>
 
@@ -34,7 +34,7 @@ export function SiteHeader() {
             </Link>
           ))}
           <a
-            href="https://github.com/palettekit/palettekit"
+            href="https://github.com/akshitagrawal/interlace"
             target="_blank"
             rel="noreferrer"
             className="ml-1 rounded-md border border-line px-3 py-1.5 text-ink transition-colors hover:border-line-strong hover:bg-surface"

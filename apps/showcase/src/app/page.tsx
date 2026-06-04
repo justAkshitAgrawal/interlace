@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CommandPalette } from "@palettekit/components/command-palette";
+import { CommandPalette } from "@interlace/components/command-palette";
 import { demoCommands, demoGroups } from "@/lib/demo-commands";
 import { InstallCommand } from "@/components/install-command";
 import { RaceTimeline } from "@/components/race-timeline";

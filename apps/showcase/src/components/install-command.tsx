@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const INSTALL =
-  "npx shadcn@latest add https://palettekit.dev/r/command-palette.json";
+  "npx shadcn@latest add https://interlace.akshitagrawal.dev/r/command-palette.json";
 
 export function InstallCommand() {
   const [copied, setCopied] = useState(false);

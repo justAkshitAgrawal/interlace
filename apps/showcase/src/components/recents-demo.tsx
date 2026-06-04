@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CommandPalette } from "@palettekit/components/command-palette";
-import type { Command, CommandGroup } from "@palettekit/components/command-palette";
+import { CommandPalette } from "@interlace/components/command-palette";
+import type { Command, CommandGroup } from "@interlace/components/command-palette";
 
 /*
  * Two conveniences most palettes skip: shortcut hints (display-only, right of

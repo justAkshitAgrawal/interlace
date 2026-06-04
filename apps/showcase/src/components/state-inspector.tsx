@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CommandPalette } from "@palettekit/components/command-palette";
+import { CommandPalette } from "@interlace/components/command-palette";
 import type {
   Command,
   PaletteStatus,
-} from "@palettekit/components/command-palette";
+} from "@interlace/components/command-palette";
 import { demoGroups } from "@/lib/demo-commands";
 
 /*

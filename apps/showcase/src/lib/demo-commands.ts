@@ -1,4 +1,4 @@
-import type { Command, CommandGroup } from "@palettekit/components/command-palette";
+import type { Command, CommandGroup } from "@interlace/components/command-palette";
 
 export const demoGroups: CommandGroup[] = [
   { id: "actions", label: "Actions" },

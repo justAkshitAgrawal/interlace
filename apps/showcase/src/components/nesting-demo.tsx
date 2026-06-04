@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CommandPalette } from "@palettekit/components/command-palette";
-import type { Command } from "@palettekit/components/command-palette";
+import { CommandPalette } from "@interlace/components/command-palette";
+import type { Command } from "@interlace/components/command-palette";
 import { demoGroups } from "@/lib/demo-commands";
 
 /*
