@@ -417,12 +417,16 @@ describe("useCommandPalette: defaultQuery", () => {
 
 describe("useCommandPalette: recents / rank / onSelectCommand", () => {
   it("threads recents into ranking so a recent item leads within its group on empty query", () => {
+    // "actions" has [new, open] in declared order; without threading, "new"
+    // leads. Marking "open" recent must float it to the top of its group —
+    // this would still pass if recents were silently dropped only if "open"
+    // were already first, so it genuinely verifies the wiring.
     const { result } = renderHook(() =>
-      useCommandPalette({ commands, groups, recents: ["settings"] }),
+      useCommandPalette({ commands, groups, recents: ["open"] }),
     );
     act(() => result.current.setOpen(true));
-    const navGroup = result.current.groups.find((g) => g.id === "nav")!;
-    expect(navGroup.items[0]!.command.id).toBe("settings");
+    const actionsGroup = result.current.groups.find((g) => g.id === "actions")!;
+    expect(actionsGroup.items[0]!.command.id).toBe("open");
   });
 
   it("uses a custom rank override instead of the built-in matcher", () => {
