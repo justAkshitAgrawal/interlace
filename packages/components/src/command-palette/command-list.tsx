@@ -4,6 +4,18 @@ import { useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { RenderGroup } from "./types";
 
+/** Scrollable list container styling, incl. a thin, themed scrollbar so the
+ *  default chunky browser chrome doesn't clash with the palette. Firefox uses
+ *  `scrollbar-*`; Chromium/WebKit use the `::-webkit-scrollbar` pseudo-elements. */
+const SCROLL_AREA =
+  "max-h-80 overflow-y-auto p-2 " +
+  "[scrollbar-width:thin] [scrollbar-color:theme(colors.zinc.300)_transparent] " +
+  "dark:[scrollbar-color:theme(colors.zinc.700)_transparent] " +
+  "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent " +
+  "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-300 " +
+  "dark:[&::-webkit-scrollbar-thumb]:bg-zinc-700 " +
+  "[&::-webkit-scrollbar-thumb]:hover:bg-zinc-400 dark:[&::-webkit-scrollbar-thumb]:hover:bg-zinc-600";
+
 /** Above this many flat rows (headers + items), switch to virtualization. */
 const VIRTUALIZE_THRESHOLD = 100;
 /** Estimated row height (px) for the virtualizer; matches the py-2 option rows. */
@@ -72,7 +84,7 @@ export function CommandList({
     );
   }
   return (
-    <ul id={listId} role="listbox" className="max-h-80 overflow-y-auto p-2">
+    <ul id={listId} role="listbox" className={SCROLL_AREA}>
       {rows.map((row) =>
         row.kind === "header" ? (
           <li
@@ -154,7 +166,7 @@ function VirtualList({
       ref={parentRef}
       id={listId}
       role="listbox"
-      className="max-h-80 overflow-y-auto p-2"
+      className={SCROLL_AREA}
     >
       <div
         role="presentation"

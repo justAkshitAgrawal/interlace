@@ -7,6 +7,15 @@ import { useCommandPalette } from "./use-command-palette";
 import { CommandList } from "./command-list";
 import { DURATION, EASING, PANEL_SPRING } from "./motion";
 
+/** Scrollable status-message container; thin themed scrollbar to match the list. */
+const SCROLL_AREA =
+  "max-h-80 overflow-y-auto p-2 " +
+  "[scrollbar-width:thin] [scrollbar-color:theme(colors.zinc.300)_transparent] " +
+  "dark:[scrollbar-color:theme(colors.zinc.700)_transparent] " +
+  "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent " +
+  "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-300 " +
+  "dark:[&::-webkit-scrollbar-thumb]:bg-zinc-700";
+
 export interface CommandPaletteProps {
   commands: Command[];
   groups?: CommandGroup[];
@@ -143,7 +152,7 @@ export function CommandPalette({
               <ul
                 id={listId}
                 role="listbox"
-                className="max-h-80 overflow-y-auto p-2"
+                className={SCROLL_AREA}
               >
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   Loading…
@@ -154,7 +163,7 @@ export function CommandPalette({
               <ul
                 id={listId}
                 role="listbox"
-                className="max-h-80 overflow-y-auto p-2"
+                className={SCROLL_AREA}
               >
                 <li className="flex flex-col items-center gap-3 px-3 py-8 text-center">
                   <span className="text-sm text-red-500 dark:text-red-400">
@@ -174,7 +183,7 @@ export function CommandPalette({
               <ul
                 id={listId}
                 role="listbox"
-                className="max-h-80 overflow-y-auto p-2"
+                className={SCROLL_AREA}
               >
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   No results for “{palette.query}”.
@@ -185,7 +194,7 @@ export function CommandPalette({
               <ul
                 id={listId}
                 role="listbox"
-                className="max-h-80 overflow-y-auto p-2"
+                className={SCROLL_AREA}
               >
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   Nothing here yet.
