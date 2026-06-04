@@ -19,7 +19,7 @@ export function SiteFooter() {
             Docs
           </Link>
           <a
-            href="https://github.com/akshitagrawal/interlace"
+            href="https://github.com/justAkshitAgrawal/interlace"
             target="_blank"
             rel="noreferrer"
             className="transition-colors hover:text-ink"

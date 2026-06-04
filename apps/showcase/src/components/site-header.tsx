@@ -34,7 +34,7 @@ export function SiteHeader() {
             </Link>
           ))}
           <a
-            href="https://github.com/akshitagrawal/interlace"
+            href="https://github.com/justAkshitAgrawal/interlace"
             target="_blank"
             rel="noreferrer"
             className="ml-1 rounded-md border border-line px-3 py-1.5 text-ink transition-colors hover:border-line-strong hover:bg-surface"
