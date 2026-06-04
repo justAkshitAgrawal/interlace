@@ -4,38 +4,109 @@ import { useState } from "react";
 import { CommandPalette } from "@palettekit/components/command-palette";
 import { demoCommands, demoGroups } from "@/lib/demo-commands";
 import { InstallCommand } from "@/components/install-command";
+import { RaceTimeline } from "@/components/race-timeline";
+import { NestingDemo } from "@/components/nesting-demo";
+import { StateInspector } from "@/components/state-inspector";
+import { MotionReadout } from "@/components/motion-readout";
 
 export default function Home() {
   const [open, setOpen] = useState(false);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col items-center px-6 py-24 text-center">
-      <h1 className="text-balance text-5xl font-semibold tracking-tight">
-        The command palette that doesn&apos;t suck.
-      </h1>
-      <p className="mt-5 max-w-xl text-balance text-lg text-zinc-500">
-        Fuzzy search, full keyboard nav, async sources, nested pages, and real
-        accessibility — as copy-paste source you own. Free.
-      </p>
+    <main>
+      {/* Hero — the differentiator leads, the inspector IS the hero. */}
+      <section className="relative overflow-hidden">
+        <div aria-hidden className="bg-grid pointer-events-none absolute inset-0 h-[420px]" />
+        <div className="relative mx-auto max-w-6xl px-5 pb-4 pt-20 sm:px-8 sm:pt-28">
+          <h1 className="max-w-3xl text-balance font-semibold tracking-tight [font-size:clamp(2rem,6vw,3.75rem)] [line-height:1.04]">
+            Watch what a great command palette does that a bad one{" "}
+            <span className="text-accent">doesn&apos;t.</span>
+          </h1>
+          <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted">
+            Async with race cancellation, every frozen state, the exact motion
+            timings. Most palettes hide this craft behind a pretty input. This one
+            puts it on the table so you can scrub it, break it, and inspect it.
+          </p>
 
-      <div className="mt-10 flex flex-col items-center gap-4">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="rounded-lg bg-zinc-900 px-5 py-3 text-sm font-medium text-white dark:bg-white dark:text-zinc-900"
-        >
-          Open the palette &nbsp;
-          <kbd className="rounded bg-white/20 px-1.5 py-0.5 text-xs dark:bg-black/10">
-            ⌘K
-          </kbd>
-        </button>
-        <InstallCommand />
-      </div>
+          <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-ink transition-transform hover:-translate-y-px active:translate-y-0"
+            >
+              Open the palette
+              <kbd className="rounded bg-black/15 px-1.5 py-0.5 font-mono text-xs">⌘K</kbd>
+            </button>
+            <InstallCommand />
+          </div>
+          <p className="mt-4 font-mono text-xs text-faint">
+            Free. Copy-paste React source you own, via the shadcn CLI.
+          </p>
+        </div>
+      </section>
 
-      <section className="mt-20 grid w-full grid-cols-1 gap-4 text-left sm:grid-cols-3">
-        <Proof title="Async sources" body="Type to fetch results. Stale responses are dropped automatically." />
-        <Proof title="Nested pages" body="Drill into sub-actions with breadcrumbs and back navigation." />
-        <Proof title="Accessible" body="Combobox semantics, focus management, and reduced-motion by default." />
+      {/* The signature artifact. */}
+      <section id="studio" className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-12 sm:px-8">
+        <SectionLabel
+          kicker="Live demo · scrub it"
+          title="The async race, in slow motion"
+          body="Type fast and two requests overlap. Scrub the timeline, then flip to a naive palette to watch the stale one win."
+        />
+        <div className="mt-7">
+          <RaceTimeline />
+        </div>
+      </section>
+
+      {/* Nested pages — the thing cmdk makes you hand-roll. */}
+      <section className="mx-auto max-w-6xl px-5 pt-24 sm:px-8">
+        <SectionLabel
+          kicker="Nested pages · walk the stack"
+          title="Drill into sub-actions without leaving the keyboard"
+          body="Select a command with children to push a sub-page; Escape pops it. A real navigation stack with breadcrumbs — most palettes make you build this yourself."
+        />
+        <div className="mt-7">
+          <NestingDemo />
+        </div>
+      </section>
+
+      {/* Frozen states. */}
+      <section id="states" className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8">
+        <SectionLabel
+          kicker="6 states · frozen"
+          title="The states that flash by too fast to see"
+          body="Loading, empty, error, no-results. Every palette has them; almost none are designed. Freeze each one and stare."
+        />
+        <div className="mt-7">
+          <StateInspector />
+        </div>
+      </section>
+
+      {/* Motion tokens. */}
+      <section className="mx-auto max-w-6xl px-5 pt-24 sm:px-8">
+        <SectionLabel
+          kicker="Straight from motion.ts"
+          title="The timings you normally only feel"
+          body="See each easing curve, then replay it. Invisible craft, made into a feature you can read and edit."
+        />
+        <div className="mt-7">
+          <MotionReadout />
+        </div>
+      </section>
+
+      {/* Closing install. */}
+      <section className="mx-auto mt-28 max-w-6xl px-5 sm:px-8">
+        <div className="rounded-2xl border border-line bg-surface/60 px-6 py-12 text-center sm:py-16">
+          <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+            Drop it in. Own the source.
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-pretty text-muted">
+            One command installs the palette as files in your repo. Yours to read,
+            edit, and ship.
+          </p>
+          <div className="mt-7 flex justify-center">
+            <InstallCommand />
+          </div>
+        </div>
       </section>
 
       <CommandPalette
@@ -48,11 +119,22 @@ export default function Home() {
   );
 }
 
-function Proof({ title, body }: { title: string; body: string }) {
+function SectionLabel({
+  kicker,
+  title,
+  body,
+}: {
+  kicker: string;
+  title: string;
+  body: string;
+}) {
   return (
-    <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <p className="mt-1.5 text-sm text-zinc-500">{body}</p>
+    <div className="max-w-2xl border-t border-line pt-7">
+      <p className="font-mono text-xs text-accent">{kicker}</p>
+      <h2 className="mt-3 text-balance text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
+        {title}
+      </h2>
+      <p className="mt-2 text-pretty leading-relaxed text-muted">{body}</p>
     </div>
   );
 }
