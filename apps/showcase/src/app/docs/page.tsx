@@ -23,6 +23,31 @@ const PROPS: { name: string; type: string; desc: string }[] = [
     type: "boolean?",
     desc: "Disable the built-in ⌘K / Ctrl+K shortcut.",
   },
+  {
+    name: "defaultQuery",
+    type: "string?",
+    desc: "Open the palette pre-filtered with this query.",
+  },
+  {
+    name: "recents",
+    type: "string[]?",
+    desc: "Recently-used command ids (most-recent first); boosts them in ranking.",
+  },
+  {
+    name: "onSelectCommand",
+    type: "(id, command) => void",
+    desc: "Fires on every selection — use it to record usage for recents.",
+  },
+  {
+    name: "rank",
+    type: "RankFn?",
+    desc: "Bring your own matcher. Defaults to the built-in fuzzy ranker.",
+  },
+  {
+    name: "shortcut (per command)",
+    type: "string[]?",
+    desc: 'Display-only shortcut hint shown on the row, e.g. ["⌘","N"].',
+  },
 ];
 
 export default function Docs() {
@@ -80,6 +105,28 @@ export default function Docs() {
         </code>
         , or extend the command types directly.
       </p>
+
+      <h2 className="mt-16 text-2xl font-semibold tracking-tight">
+        Bring your own matcher
+      </h2>
+      <p className="mt-3 max-w-xl text-pretty leading-relaxed text-muted">
+        The built-in fuzzy ranker is the default. Pass{" "}
+        <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[0.85em] text-ink">
+          rank
+        </code>{" "}
+        to swap in your own — fuzzysort, command-score, or a server-side ranker:
+      </p>
+      <pre className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface p-4 font-mono text-xs leading-relaxed text-muted">
+        {`<CommandPalette
+  commands={commands}
+  rank={(cmds, query) =>
+    myMatcher(cmds, query).map((command) => ({
+      command,
+      matchedIndices: [],
+    }))
+  }
+/>`}
+      </pre>
     </main>
   );
 }

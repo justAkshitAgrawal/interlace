@@ -8,9 +8,11 @@ import { RaceTimeline } from "@/components/race-timeline";
 import { NestingDemo } from "@/components/nesting-demo";
 import { StateInspector } from "@/components/state-inspector";
 import { MotionReadout } from "@/components/motion-readout";
+import { ScaleDemo } from "@/components/scale-demo";
 
 export default function Home() {
   const [open, setOpen] = useState(false);
+  const [recents, setRecents] = useState<string[]>([]);
 
   return (
     <main>
@@ -93,6 +95,18 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Scale — virtualization. */}
+      <section className="mx-auto max-w-6xl px-5 pt-24 sm:px-8">
+        <SectionLabel
+          kicker="Virtualized · 5,000 commands"
+          title="Stays instant no matter how long the list gets"
+          body="Only the visible rows render. Big command sets scroll and filter without breaking a sweat."
+        />
+        <div className="mt-7">
+          <ScaleDemo />
+        </div>
+      </section>
+
       {/* Closing install. */}
       <section className="mx-auto mt-28 max-w-6xl px-5 sm:px-8">
         <div className="rounded-2xl border border-line bg-surface/60 px-6 py-12 text-center sm:py-16">
@@ -114,6 +128,10 @@ export default function Home() {
         groups={demoGroups}
         open={open}
         onOpenChange={setOpen}
+        recents={recents}
+        onSelectCommand={(id) =>
+          setRecents((prev) => [id, ...prev.filter((x) => x !== id)].slice(0, 5))
+        }
       />
     </main>
   );

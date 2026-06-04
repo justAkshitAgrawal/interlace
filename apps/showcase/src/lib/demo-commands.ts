@@ -7,7 +7,7 @@ export const demoGroups: CommandGroup[] = [
 ];
 
 export const demoCommands: Command[] = [
-  { id: "new-issue", label: "Create new issue", group: "actions", keywords: ["add", "task"] },
+  { id: "new-issue", label: "Create new issue", group: "actions", keywords: ["add", "task"], shortcut: ["⌘", "N"] },
   {
     id: "status",
     label: "Change status…",
@@ -31,7 +31,7 @@ export const demoCommands: Command[] = [
         .map((label) => ({ id: label, label }));
     },
   },
-  { id: "go-inbox", label: "Go to Inbox", group: "navigation" },
-  { id: "go-settings", label: "Go to Settings", group: "navigation" },
+  { id: "go-inbox", label: "Go to Inbox", group: "navigation", shortcut: ["G", "I"] },
+  { id: "go-settings", label: "Go to Settings", group: "navigation", shortcut: ["G", "S"] },
   { id: "recent-1", label: "Reopened: Login bug", group: "recent" },
 ];
