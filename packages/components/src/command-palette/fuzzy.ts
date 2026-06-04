@@ -56,18 +56,46 @@ function range(n: number): number[] {
   return Array.from({ length: n }, (_, i) => i);
 }
 
+/** Max recency boost. Strictly less than the gap between adjacent score tiers
+ *  (e.g. SCORE_WORD_BOUNDARY 250 → SCORE_SCATTERED 100 gap is 150), so recency
+ *  nudges ties/near-ties but never lifts a match into a higher tier. */
+const RECENCY_WEIGHT = 40;
+
+/** Boost for a command id given the recents list (most-recent first). 0 if absent. */
+function recencyBoost(id: string, recents?: string[]): number {
+  if (!recents || recents.length === 0) return 0;
+  const idx = recents.indexOf(id);
+  if (idx < 0) return 0;
+  return RECENCY_WEIGHT * (1 - idx / recents.length);
+}
+
 /**
  * Filters + ranks commands against a query. Empty query returns all commands
- * in their original order with no highlight indices.
+ * in their original order with no highlight indices — except recent commands
+ * (if `recents` is given) sort to the front in recents order. For a non-empty
+ * query, recency adds a sub-tier boost to each match's score.
  */
-export function rankCommands(commands: Command[], query: string): RankedCommand[] {
+export function rankCommands(
+  commands: Command[],
+  query: string,
+  recents?: string[],
+): RankedCommand[] {
   if (query === "") {
-    return commands.map((command) => ({ command, matchedIndices: [] }));
+    const base = commands.map((command) => ({ command, matchedIndices: [] }));
+    if (!recents || recents.length === 0) return base;
+    const inRecents = (id: string) => recents.indexOf(id);
+    return [...base].sort((a, b) => {
+      const ra = inRecents(a.command.id);
+      const rb = inRecents(b.command.id);
+      if (ra === -1 && rb === -1) return 0;
+      if (ra === -1) return 1;
+      if (rb === -1) return -1;
+      return ra - rb;
+    });
   }
 
   const scored: { command: Command; result: FuzzyResult }[] = [];
   for (const command of commands) {
-    // Best score across label + keywords; indices only kept for the label.
     const labelRes = fuzzyScore(query, command.label);
     let best = labelRes;
     let bestIndices = labelRes?.indices ?? [];
@@ -75,10 +103,13 @@ export function rankCommands(commands: Command[], query: string): RankedCommand[
       const kwRes = fuzzyScore(query, kw);
       if (kwRes && (!best || kwRes.score > best.score)) {
         best = kwRes;
-        bestIndices = labelRes?.indices ?? []; // never highlight keyword chars in the label
+        bestIndices = labelRes?.indices ?? [];
       }
     }
-    if (best) scored.push({ command, result: { ...best, indices: bestIndices } });
+    if (best) {
+      const boosted = best.score + recencyBoost(command.id, recents);
+      scored.push({ command, result: { score: boosted, indices: bestIndices } });
+    }
   }
 
   scored.sort((a, b) => b.result.score - a.result.score);

@@ -66,3 +66,45 @@ describe("rankCommands", () => {
     expect(ranked[0]!.command.id).toBe("search");
   });
 });
+
+describe("rankCommands: recents boost", () => {
+  const cmds: Command[] = [
+    { id: "settings", label: "Settings" },
+    { id: "search", label: "Search" },
+  ];
+
+  it("floats a recent command above an equal-ish-scoring peer", () => {
+    const base = rankCommands(cmds, "se");
+    expect(base[0]!.command.id).toBe("search");
+    const boosted = rankCommands(cmds, "se", ["settings"]);
+    expect(boosted[0]!.command.id).toBe("settings");
+  });
+
+  it("does not let a recent scattered match beat a fresh exact match", () => {
+    const items: Command[] = [
+      { id: "go", label: "Go" },
+      { id: "dialog", label: "Open dialog" },
+    ];
+    const ranked = rankCommands(items, "go", ["dialog"]);
+    expect(ranked[0]!.command.id).toBe("go");
+  });
+
+  it("orders recents first on an empty query, rest keep original order", () => {
+    const items: Command[] = [
+      { id: "a", label: "Alpha" },
+      { id: "b", label: "Bravo" },
+      { id: "c", label: "Charlie" },
+    ];
+    const ranked = rankCommands(items, "", ["c", "a"]);
+    expect(ranked.map((r) => r.command.id)).toEqual(["c", "a", "b"]);
+    expect(ranked[0]!.matchedIndices).toEqual([]);
+  });
+
+  it("is identical to no-recents when recents is undefined or empty", () => {
+    const a = rankCommands(cmds, "se");
+    const b = rankCommands(cmds, "se", []);
+    const c = rankCommands(cmds, "se", undefined);
+    expect(b.map((r) => r.command.id)).toEqual(a.map((r) => r.command.id));
+    expect(c.map((r) => r.command.id)).toEqual(a.map((r) => r.command.id));
+  });
+});
