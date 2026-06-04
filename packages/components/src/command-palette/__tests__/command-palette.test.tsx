@@ -86,6 +86,94 @@ describe("CommandPalette view", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
+
+  it("puts combobox roles on the input and dialog on the panel", () => {
+    render(<Harness />);
+    const input = screen.getByRole("combobox");
+    expect(input.tagName).toBe("INPUT");
+    expect(input).toHaveAttribute("aria-expanded", "true");
+    const listbox = screen.getByRole("listbox");
+    expect(input).toHaveAttribute("aria-controls", listbox.id);
+    expect(input).toHaveAttribute("aria-autocomplete", "list");
+    // active descendant points at the active option
+    const activeId = input.getAttribute("aria-activedescendant");
+    expect(activeId).toBeTruthy();
+    expect(document.getElementById(activeId!)).not.toBeNull();
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(dialog).toHaveAttribute("aria-label");
+  });
+
+  it("does not expose a role=textbox element", () => {
+    render(<Harness />);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("traps focus within the palette (Tab does not escape to the page)", async () => {
+    const user = userEvent.setup();
+    function H() {
+      const [open, setOpen] = useState(true);
+      return (
+        <div>
+          <button data-testid="outside">Outside</button>
+          <CommandPalette
+            commands={commands}
+            groups={groups}
+            open={open}
+            onOpenChange={setOpen}
+            disableShortcut
+          />
+        </div>
+      );
+    }
+    render(<H />);
+    const input = screen.getByRole("combobox");
+    const outside = screen.getByTestId("outside");
+    const dialog = screen.getByRole("dialog");
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    for (let i = 0; i < 5; i++) {
+      await user.tab();
+      expect(document.activeElement).not.toBe(outside);
+      expect(dialog.contains(document.activeElement)).toBe(true);
+    }
+    for (let i = 0; i < 5; i++) {
+      await user.tab({ shift: true });
+      expect(document.activeElement).not.toBe(outside);
+      expect(dialog.contains(document.activeElement)).toBe(true);
+    }
+  });
+
+  it("exposes a polite live region reflecting result status", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(status).toHaveTextContent(/result/i);
+    await user.keyboard("zzzzz");
+    expect(screen.getByRole("status")).toHaveTextContent(/no results/i);
+  });
+
+  it("notifies onOpenChange(false) on internal Escape close (no desync)", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    function H() {
+      return (
+        <CommandPalette
+          commands={commands}
+          groups={groups}
+          open
+          onOpenChange={onOpenChange}
+          disableShortcut
+        />
+      );
+    }
+    render(<H />);
+    screen.getByRole("combobox").focus();
+    await user.keyboard("{Escape}");
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
 });
 
 describe("CommandPalette: shortcut hints", () => {

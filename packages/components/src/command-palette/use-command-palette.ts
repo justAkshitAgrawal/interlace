@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -19,6 +20,12 @@ import { rankCommands } from "./fuzzy";
 export interface UseCommandPaletteOptions {
   commands: Command[];
   groups?: CommandGroup[];
+  /**
+   * Controlled open state. When provided, this is the single source of truth
+   * the hook reports back; the internal state only mirrors it. When omitted
+   * (standalone hook usage), the hook owns `open` itself.
+   */
+  open?: boolean;
   /** Notified whenever the hook changes its open state (e.g. Escape at root). */
   onOpenChange?: (open: boolean) => void;
   /** Opens the palette pre-filtered with this query. */
@@ -42,13 +49,17 @@ interface AsyncState {
 }
 
 export function useCommandPalette(options: UseCommandPaletteOptions) {
-  const { commands, groups = [], onOpenChange, defaultQuery, recents, onSelectCommand, rank } = options;
+  const { commands, groups = [], open: openProp, onOpenChange, defaultQuery, recents, onSelectCommand, rank } = options;
+  const controlled = openProp !== undefined;
   const rootPage = useMemo<Page>(
     () => ({ parentCommandId: null, title: null, commands }),
     [commands],
   );
 
-  const [open, setOpenState] = useState(false);
+  const [openState, setOpenState] = useState(false);
+  // Controlled: the prop is the single source of truth we report back.
+  // Uncontrolled (standalone): the hook owns its own open state.
+  const open = controlled ? openProp! : openState;
   const [query, setQueryState] = useState(defaultQuery ?? "");
   const [activeIndex, setActiveIndex] = useState(0);
   const [stack, setStack] = useState<Page[]>([rootPage]);
@@ -74,12 +85,25 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
 
   const setOpen = useCallback(
     (next: boolean) => {
+      // Always mirror locally so uncontrolled usage works and a controlled
+      // parent that ignores onOpenChange can't permanently desync the reset.
       setOpenState(next);
       if (!next) resetToRoot();
       onOpenChange?.(next);
     },
     [resetToRoot, onOpenChange],
   );
+
+  // In controlled mode the prop drives reset directly: when the parent closes
+  // the palette (open true → false) — including a path that never went through
+  // the hook's own setOpen — run the same reset. This is what closes the
+  // silent-desync hole: reset is bound to the source-of-truth prop, not to
+  // whether setOpen happened to be called.
+  const prevOpen = useRef(open);
+  useEffect(() => {
+    if (controlled && prevOpen.current && !open) resetToRoot();
+    prevOpen.current = open;
+  }, [controlled, open, resetToRoot]);
 
   const setQuery = useCallback((q: string) => {
     setQueryState(q);

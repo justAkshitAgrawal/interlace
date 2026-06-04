@@ -49,6 +49,7 @@ export function CommandPalette({
   const palette = useCommandPalette({
     commands,
     groups,
+    open,
     onOpenChange,
     defaultQuery,
     recents,
@@ -58,13 +59,8 @@ export function CommandPalette({
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const listId = useId();
-
-  // Keep the hook's internal open state in sync with the controlled prop.
-  useEffect(() => {
-    if (palette.open !== open) palette.setOpen(open);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   // Global ⌘K / Ctrl+K toggle.
   useEffect(() => {
@@ -90,6 +86,52 @@ export function CommandPalette({
       triggerRef.current?.focus?.({ preventScroll: true });
     }
   }, [open]);
+
+  // Minimal, dependency-free focus trap: keep Tab / Shift+Tab cycling within
+  // the panel so focus never escapes to the page behind the backdrop.
+  const onPanelKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab") return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusable = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter(
+      (el) =>
+        !el.hasAttribute("disabled") &&
+        el.getAttribute("aria-hidden") !== "true" &&
+        (el as HTMLInputElement).type !== "hidden",
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0]!;
+    const last = focusable[focusable.length - 1]!;
+    const activeEl = document.activeElement;
+    if (e.shiftKey) {
+      if (activeEl === first || !panel.contains(activeEl)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (activeEl === last || !panel.contains(activeEl)) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
+  // Concise live-region message reflecting the current status.
+  const flatCount = palette.groups.reduce((n, g) => n + g.items.length, 0);
+  const liveMessage =
+    palette.status === "loading"
+      ? "Loading…"
+      : palette.status === "error"
+        ? palette.error?.message ?? "Something went wrong."
+        : palette.status === "no-results"
+          ? "No results"
+          : palette.status === "empty"
+            ? "No commands"
+            : `${flatCount} result${flatCount === 1 ? "" : "s"}`;
 
   const motionOff = reduceMotion ?? false;
   const fade = motionOff
@@ -120,13 +162,17 @@ export function CommandPalette({
         >
           <motion.div
             {...panel}
-            role="combobox"
-            aria-expanded
-            aria-controls={listId}
-            aria-haspopup="listbox"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={onPanelKeyDown}
             className="w-full max-w-xl overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
           >
+            <div role="status" aria-live="polite" className="sr-only">
+              {liveMessage}
+            </div>
             {palette.pages.length > 1 && (
               <button
                 type="button"
@@ -142,7 +188,8 @@ export function CommandPalette({
               onChange={(e) => palette.setQuery(e.target.value)}
               onKeyDown={palette.onKeyDown}
               placeholder={placeholder}
-              role="textbox"
+              role="combobox"
+              aria-expanded={true}
               aria-autocomplete="list"
               aria-controls={listId}
               aria-activedescendant={
