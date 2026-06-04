@@ -7,7 +7,7 @@ export const demoGroups: CommandGroup[] = [
 ];
 
 export const demoCommands: Command[] = [
-  { id: "new-issue", label: "Create new issue", group: "actions", keywords: ["add", "task"], shortcut: ["⌘", "N"] },
+  { id: "new-issue", label: "Create new issue", group: "actions", keywords: ["add", "task"], shortcut: ["⌘", "⇧", "I"] },
   {
     id: "status",
     label: "Change status…",

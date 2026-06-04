@@ -46,7 +46,7 @@ const PROPS: { name: string; type: string; desc: string }[] = [
   {
     name: "shortcut (per command)",
     type: "string[]?",
-    desc: 'Display-only shortcut hint shown on the row, e.g. ["⌘","N"].',
+    desc: 'Display-only hint shown on the row, e.g. ["⌘","⇧","P"]. Your app binds the actual key (like cmdk); the palette only renders it.',
   },
 ];
 

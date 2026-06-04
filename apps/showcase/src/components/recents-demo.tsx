@@ -17,9 +17,9 @@ const groups: CommandGroup[] = [
 ];
 
 const commands: Command[] = [
-  { id: "new-issue", label: "Create new issue", group: "actions", shortcut: ["⌘", "N"] },
-  { id: "new-doc", label: "Create document", group: "actions", shortcut: ["⌘", "D"] },
-  { id: "search", label: "Search everything", group: "actions", shortcut: ["⌘", "K"] },
+  { id: "new-issue", label: "Create new issue", group: "actions", shortcut: ["⌘", "⇧", "I"] },
+  { id: "new-doc", label: "Create document", group: "actions", shortcut: ["⌘", "E"] },
+  { id: "search", label: "Search everything", group: "actions", shortcut: ["/"] },
   { id: "go-inbox", label: "Go to Inbox", group: "navigation", shortcut: ["G", "I"] },
   { id: "go-settings", label: "Go to Settings", group: "navigation", shortcut: ["G", "S"] },
   { id: "go-projects", label: "Go to Projects", group: "navigation", shortcut: ["G", "P"] },
@@ -37,6 +37,11 @@ export function RecentsDemo() {
         Shortcut hints sit on the right of each row. Run a few commands, then{" "}
         <span className="text-ink">reopen the palette</span> — recently-used
         commands float to the top of their group.
+      </p>
+      <p className="mb-3 text-pretty text-xs leading-relaxed text-faint">
+        Hints are display-only — your app wires the actual keys (just like cmdk).
+        The built-in <kbd className="rounded border border-line bg-surface-2 px-1 font-mono">⌘K</kbd>{" "}
+        to open is the one shortcut the palette owns.
       </p>
 
       <p className="mb-3 flex flex-wrap items-center gap-2 font-mono text-xs">
