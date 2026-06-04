@@ -193,7 +193,8 @@ function Sample({
     if (!el) return;
     const BOX = 28; // h-7 / w-7
     const PADDING = 8; // px-1 on each side
-    const measure = () => setTravel(Math.max(0, el.clientWidth - BOX - PADDING));
+    const measure = () =>
+      setTravel(Math.max(0, el.clientWidth - BOX - PADDING));
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);

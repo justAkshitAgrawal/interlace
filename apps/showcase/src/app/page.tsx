@@ -19,7 +19,10 @@ export default function Home() {
     <main>
       {/* Hero — the differentiator leads, the inspector IS the hero. */}
       <section className="relative overflow-hidden">
-        <div aria-hidden className="bg-grid pointer-events-none absolute inset-0 h-[420px]" />
+        <div
+          aria-hidden
+          className="bg-grid pointer-events-none absolute inset-0 h-[420px]"
+        />
         <div className="relative mx-auto max-w-6xl px-5 pb-4 pt-20 sm:px-8 sm:pt-28">
           <h1 className="max-w-3xl text-balance font-semibold tracking-tight [font-size:clamp(2rem,6vw,3.75rem)] [line-height:1.04]">
             Watch what a great command palette does that a bad one{" "}
@@ -27,8 +30,9 @@ export default function Home() {
           </h1>
           <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted">
             Async with race cancellation, every frozen state, the exact motion
-            timings. Most palettes hide this craft behind a pretty input. This one
-            puts it on the table so you can scrub it, break it, and inspect it.
+            timings. Most palettes hide this craft behind a pretty input. This
+            one puts it on the table so you can scrub it, break it, and inspect
+            it.
           </p>
 
           <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -38,7 +42,9 @@ export default function Home() {
               className="flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-ink transition-transform hover:-translate-y-px active:translate-y-0"
             >
               Open the palette
-              <kbd className="rounded bg-black/15 px-1.5 py-0.5 font-mono text-xs">⌘K</kbd>
+              <kbd className="rounded bg-black/15 px-1.5 py-0.5 font-mono text-xs">
+                ⌘K
+              </kbd>
             </button>
             <InstallCommand />
           </div>
@@ -49,7 +55,10 @@ export default function Home() {
       </section>
 
       {/* The signature artifact. */}
-      <section id="studio" className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-12 sm:px-8">
+      <section
+        id="studio"
+        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-12 sm:px-8"
+      >
         <SectionLabel
           kicker="Live demo · scrub it"
           title="The async race, in slow motion"
@@ -73,7 +82,10 @@ export default function Home() {
       </section>
 
       {/* Recents + shortcut hints. */}
-      <section id="recents" className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8">
+      <section
+        id="recents"
+        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8"
+      >
         <SectionLabel
           kicker="Recents · shortcut hints"
           title="Remembers what you use, and shows the keys"
@@ -85,7 +97,10 @@ export default function Home() {
       </section>
 
       {/* Frozen states. */}
-      <section id="states" className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8">
+      <section
+        id="states"
+        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8"
+      >
         <SectionLabel
           kicker="6 states · frozen"
           title="The states that flash by too fast to see"
@@ -127,8 +142,8 @@ export default function Home() {
             Drop it in. Own the source.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-pretty text-muted">
-            One command installs the palette as files in your repo. Yours to read,
-            edit, and ship.
+            One command installs the palette as files in your repo. Yours to
+            read, edit, and ship.
           </p>
           <div className="mt-7 flex justify-center">
             <InstallCommand />
@@ -143,7 +158,9 @@ export default function Home() {
         onOpenChange={setOpen}
         recents={recents}
         onSelectCommand={(id) =>
-          setRecents((prev) => [id, ...prev.filter((x) => x !== id)].slice(0, 5))
+          setRecents((prev) =>
+            [id, ...prev.filter((x) => x !== id)].slice(0, 5),
+          )
         }
       />
     </main>

@@ -126,7 +126,7 @@ export function CommandPalette({
     palette.status === "loading"
       ? "Loading…"
       : palette.status === "error"
-        ? palette.error?.message ?? "Something went wrong."
+        ? (palette.error?.message ?? "Something went wrong.")
         : palette.status === "no-results"
           ? "No results"
           : palette.status === "empty"
@@ -198,22 +198,14 @@ export function CommandPalette({
               className="w-full border-b border-zinc-200 bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-zinc-400 dark:border-zinc-800"
             />
             {palette.status === "loading" && (
-              <ul
-                id={listId}
-                role="listbox"
-                className={SCROLL_AREA}
-              >
+              <ul id={listId} role="listbox" className={SCROLL_AREA}>
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   Loading…
                 </li>
               </ul>
             )}
             {palette.status === "error" && (
-              <ul
-                id={listId}
-                role="listbox"
-                className={SCROLL_AREA}
-              >
+              <ul id={listId} role="listbox" className={SCROLL_AREA}>
                 <li className="flex flex-col items-center gap-3 px-3 py-8 text-center">
                   <span className="text-sm text-red-500 dark:text-red-400">
                     {palette.error?.message ?? "Something went wrong."}
@@ -229,22 +221,14 @@ export function CommandPalette({
               </ul>
             )}
             {palette.status === "no-results" && (
-              <ul
-                id={listId}
-                role="listbox"
-                className={SCROLL_AREA}
-              >
+              <ul id={listId} role="listbox" className={SCROLL_AREA}>
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   No results for “{palette.query}”.
                 </li>
               </ul>
             )}
             {palette.status === "empty" && (
-              <ul
-                id={listId}
-                role="listbox"
-                className={SCROLL_AREA}
-              >
+              <ul id={listId} role="listbox" className={SCROLL_AREA}>
                 <li className="px-3 py-6 text-center text-sm text-zinc-400">
                   Nothing here yet.
                 </li>
