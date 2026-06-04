@@ -87,3 +87,35 @@ describe("CommandPalette view", () => {
     expect(results).toHaveNoViolations();
   });
 });
+
+describe("CommandPalette: shortcut hints", () => {
+  it("renders shortcut tokens as kbd elements when present", () => {
+    function H() {
+      const [open, setOpen] = useState(true);
+      const cmds: Command[] = [
+        { id: "new", label: "New File", shortcut: ["⌘", "N"] },
+      ];
+      return (
+        <CommandPalette commands={cmds} open={open} onOpenChange={setOpen} disableShortcut />
+      );
+    }
+    render(<H />);
+    const option = screen.getByRole("option");
+    const kbds = option.querySelectorAll("kbd");
+    expect(kbds.length).toBe(2);
+    expect(kbds[0]!.textContent).toBe("⌘");
+    expect(kbds[1]!.textContent).toBe("N");
+  });
+
+  it("renders no kbd when a command has no shortcut", () => {
+    function H() {
+      const [open, setOpen] = useState(true);
+      const cmds: Command[] = [{ id: "new", label: "New File" }];
+      return (
+        <CommandPalette commands={cmds} open={open} onOpenChange={setOpen} disableShortcut />
+      );
+    }
+    render(<H />);
+    expect(screen.getByRole("option").querySelector("kbd")).toBeNull();
+  });
+});

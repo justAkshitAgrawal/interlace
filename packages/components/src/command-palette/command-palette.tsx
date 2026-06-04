@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { Command, CommandGroup } from "./types";
+import type { Command, CommandGroup, RankFn } from "./types";
 import { useCommandPalette } from "./use-command-palette";
 import { DURATION, EASING, PANEL_SPRING } from "./motion";
 
@@ -16,6 +16,12 @@ export interface CommandPaletteProps {
   disableShortcut?: boolean;
   /** Opens the palette pre-filtered with this query. */
   defaultQuery?: string;
+  /** Ordered ids, most-recent-first. Boosts these in ranking. */
+  recents?: string[];
+  /** Fired for every command selection. */
+  onSelectCommand?: (id: string, command: Command) => void;
+  /** Override the ranking function. Defaults to the built-in matcher. */
+  rank?: RankFn;
 }
 
 export function CommandPalette({
@@ -26,8 +32,19 @@ export function CommandPalette({
   placeholder = "Type a command or search…",
   disableShortcut = false,
   defaultQuery,
+  recents,
+  onSelectCommand,
+  rank,
 }: CommandPaletteProps) {
-  const palette = useCommandPalette({ commands, groups, onOpenChange, defaultQuery });
+  const palette = useCommandPalette({
+    commands,
+    groups,
+    onOpenChange,
+    defaultQuery,
+    recents,
+    onSelectCommand,
+    rank,
+  });
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -188,6 +205,18 @@ export function CommandPalette({
                               text={item.command.label}
                               indices={item.matchedIndices}
                             />
+                            {item.command.shortcut && (
+                              <span className="ml-auto flex items-center gap-1">
+                                {item.command.shortcut.map((token, i) => (
+                                  <kbd
+                                    key={i}
+                                    className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
+                                  >
+                                    {token}
+                                  </kbd>
+                                ))}
+                              </span>
+                            )}
                           </li>
                         );
                       })}
