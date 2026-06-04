@@ -11,6 +11,7 @@ import type {
   Page,
   PaletteStatus,
   RankedCommand,
+  RankFn,
   RenderGroup,
 } from "./types";
 import { rankCommands } from "./fuzzy";
@@ -22,6 +23,12 @@ export interface UseCommandPaletteOptions {
   onOpenChange?: (open: boolean) => void;
   /** Opens the palette pre-filtered with this query. */
   defaultQuery?: string;
+  /** Ordered ids, most-recent-first. Boosts these in the built-in ranking. */
+  recents?: string[];
+  /** Fired for every command selection (top-level, nested, async, page-push). */
+  onSelectCommand?: (id: string, command: Command) => void;
+  /** Override the ranking function. Defaults to the built-in rankCommands. */
+  rank?: RankFn;
 }
 
 interface AsyncState {
@@ -35,7 +42,7 @@ interface AsyncState {
 }
 
 export function useCommandPalette(options: UseCommandPaletteOptions) {
-  const { commands, groups = [], onOpenChange, defaultQuery } = options;
+  const { commands, groups = [], onOpenChange, defaultQuery, recents, onSelectCommand, rank } = options;
   const rootPage = useMemo<Page>(
     () => ({ parentCommandId: null, title: null, commands }),
     [commands],
@@ -131,8 +138,8 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
   }, []);
 
   const renderGroups = useMemo<RenderGroup[]>(
-    () => buildGroups(currentPage.commands, groups, query),
-    [currentPage.commands, groups, query],
+    () => buildGroups(currentPage.commands, groups, query, recents, rank),
+    [currentPage.commands, groups, query, recents, rank],
   );
 
   const flat = useMemo<RankedCommand[]>(
@@ -161,6 +168,7 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
     (id: string) => {
       const cmd = flat.find((i) => i.command.id === id)?.command;
       if (!cmd) return;
+      onSelectCommand?.(id, cmd);
       if (typeof cmd.children === "function") {
         runResolver(cmd.children);
         return;
@@ -175,7 +183,7 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
       }
       void cmd.onSelect?.();
     },
-    [flat, runResolver, pushStaticPage],
+    [flat, runResolver, pushStaticPage, onSelectCommand],
   );
 
   const retry = useCallback(() => {
@@ -243,8 +251,11 @@ function buildGroups(
   commands: Command[],
   groupDefs: CommandGroup[],
   query: string,
+  recents: string[] | undefined,
+  rank: RankFn | undefined,
 ): RenderGroup[] {
-  const ranked = rankCommands(commands, query);
+  const ranker = rank ?? rankCommands;
+  const ranked = ranker(commands, query, recents);
   const byGroup = new Map<string, RenderGroup>();
   const order: string[] = [];
   const ensure = (id: string, label: string | null) => {

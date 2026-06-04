@@ -414,3 +414,57 @@ describe("useCommandPalette: defaultQuery", () => {
     expect(result.current.query).toBe("");
   });
 });
+
+describe("useCommandPalette: recents / rank / onSelectCommand", () => {
+  it("threads recents into ranking so a recent item leads within its group on empty query", () => {
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, recents: ["settings"] }),
+    );
+    act(() => result.current.setOpen(true));
+    const navGroup = result.current.groups.find((g) => g.id === "nav")!;
+    expect(navGroup.items[0]!.command.id).toBe("settings");
+  });
+
+  it("uses a custom rank override instead of the built-in matcher", () => {
+    const calls: string[] = [];
+    const rank = (cmds: Command[], query: string) => {
+      calls.push(query);
+      return [...cmds].reverse().map((command) => ({ command, matchedIndices: [] }));
+    };
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands, groups, rank }),
+    );
+    act(() => result.current.setOpen(true));
+    act(() => result.current.setQuery("zzz")); // built-in would yield 0 matches
+    expect(calls.length).toBeGreaterThan(0);
+    const ids = result.current.groups.flatMap((g) => g.items.map((i) => i.command.id));
+    expect(ids.length).toBe(commands.length); // custom rank returned all, not no-results
+  });
+
+  it("fires onSelectCommand for a top-level selection with (id, command)", () => {
+    const onSelectCommand = vi.fn();
+    const onSelect = vi.fn();
+    const cmds: Command[] = [{ id: "go", label: "Go", onSelect }];
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands: cmds, onSelectCommand }),
+    );
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("go"));
+    expect(onSelectCommand).toHaveBeenCalledWith("go", cmds[0]);
+    expect(onSelect).toHaveBeenCalledOnce();
+  });
+
+  it("fires onSelectCommand when selecting a command that pushes a nested page", () => {
+    const onSelectCommand = vi.fn();
+    const cmds: Command[] = [
+      { id: "status", label: "Change status", children: [{ id: "todo", label: "Todo" }] },
+    ];
+    const { result } = renderHook(() =>
+      useCommandPalette({ commands: cmds, onSelectCommand }),
+    );
+    act(() => result.current.setOpen(true));
+    act(() => result.current.select("status"));
+    expect(onSelectCommand).toHaveBeenCalledWith("status", cmds[0]);
+    expect(result.current.pages).toHaveLength(2);
+  });
+});
