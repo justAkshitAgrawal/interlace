@@ -14,9 +14,14 @@ describe("buildComponent (command-palette)", () => {
     expect(item.dependencies).toContain("framer-motion");
   });
 
-  it("includes all five source files with targets, excluding the barrel", () => {
+  it("declares @tanstack/react-virtual as a dependency", () => {
+    expect(item.dependencies).toContain("@tanstack/react-virtual");
+  });
+
+  it("includes all six source files with targets, excluding the barrel", () => {
     const paths = item.files.map((f) => f.path).sort();
     expect(paths).toEqual([
+      "command-palette/command-list.tsx",
       "command-palette/command-palette.tsx",
       "command-palette/fuzzy.ts",
       "command-palette/motion.ts",
@@ -32,7 +37,9 @@ describe("buildComponent (command-palette)", () => {
   it("classifies the hook and view file types correctly", () => {
     const hook = item.files.find((f) => f.path.endsWith("use-command-palette.ts"));
     const view = item.files.find((f) => f.path.endsWith("command-palette.tsx"));
+    const list = item.files.find((f) => f.path.endsWith("command-list.tsx"));
     expect(hook!.type).toBe("registry:hook");
     expect(view!.type).toBe("registry:ui");
+    expect(list!.type).toBe("registry:ui");
   });
 });

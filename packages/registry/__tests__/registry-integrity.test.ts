@@ -35,6 +35,12 @@ describe("registry integrity: command-palette.json", () => {
     }
   });
 
+  it("declares the runtime dependencies a consumer must install", () => {
+    const item = JSON.parse(readFileSync(OUT, "utf8"));
+    expect(item.dependencies).toContain("framer-motion");
+    expect(item.dependencies).toContain("@tanstack/react-virtual");
+  });
+
   it("ships every source file the component needs to compile", () => {
     const item = JSON.parse(readFileSync(OUT, "utf8"));
     const names = item.files.map((f: { path: string }) => f.path);
@@ -44,6 +50,7 @@ describe("registry integrity: command-palette.json", () => {
       "command-palette/motion.ts",
       "command-palette/use-command-palette.ts",
       "command-palette/command-palette.tsx",
+      "command-palette/command-list.tsx",
     ]) {
       expect(names).toContain(required);
     }

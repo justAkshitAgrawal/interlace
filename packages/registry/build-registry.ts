@@ -19,7 +19,7 @@ function fileType(name: string): string {
 
 /** External runtime deps a component needs (kept explicit, not parsed). */
 const DEPENDENCIES: Record<string, string[]> = {
-  "command-palette": ["framer-motion"],
+  "command-palette": ["framer-motion", "@tanstack/react-virtual"],
 };
 
 function listSourceFiles(dir: string): string[] {
