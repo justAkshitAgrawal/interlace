@@ -89,6 +89,15 @@ describe("rankCommands: recents boost", () => {
     expect(ranked[0]!.command.id).toBe("go");
   });
 
+  it("does not let a recent word-boundary match beat a fresh prefix match (realistic labels)", () => {
+    const items: Command[] = [
+      { id: "settings", label: "Settings" }, // prefix match for "set"
+      { id: "reset", label: "Reset toggle" }, // word-boundary match for "set"
+    ];
+    const ranked = rankCommands(items, "set", ["reset"]);
+    expect(ranked[0]!.command.id).toBe("settings"); // boost can't cross the tier for normal labels
+  });
+
   it("orders recents first on an empty query, rest keep original order", () => {
     const items: Command[] = [
       { id: "a", label: "Alpha" },

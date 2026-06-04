@@ -56,10 +56,16 @@ function range(n: number): number[] {
   return Array.from({ length: n }, (_, i) => i);
 }
 
-/** Max recency boost. Strictly less than the gap between adjacent score tiers
- *  (e.g. SCORE_WORD_BOUNDARY 250 → SCORE_SCATTERED 100 gap is 150), so recency
- *  nudges ties/near-ties but never lifts a match into a higher tier. */
-const RECENCY_WEIGHT = 40;
+/**
+ * Max recency boost. Kept small (≤10) so it only flips near-ties — e.g. two
+ * prefix matches of similar length, the realistic case ("se" → Settings vs
+ * Search). It is NOT a hard tier guarantee: prefix scores decay with target
+ * length (`SCORE_PREFIX - target.length`), so for pathological inputs (labels
+ * hundreds of chars long) the base tiers already overlap before any boost.
+ * For real command labels (tens of chars) a boost this small cannot cross a
+ * tier; we deliberately don't promise more than that.
+ */
+const RECENCY_WEIGHT = 8;
 
 /** Boost for a command id given the recents list (most-recent first). 0 if absent. */
 function recencyBoost(id: string, recents?: string[]): number {
