@@ -16,13 +16,15 @@
 
   --ink: oklch(0.96 0.01 80);
   --muted: oklch(0.76 0.018 72);
-  --faint: oklch(0.6 0.016 66);
+  /* Lifted from 0.6 so small/mono micro-copy clears WCAG AA (4.5:1) on --bg. */
+  --faint: oklch(0.7 0.018 66);
 
   --accent: oklch(0.81 0.155 72);
   --accent-soft: oklch(0.62 0.12 66);
   --accent-ink: oklch(0.2 0.035 70);
 
-  --stale: oklch(0.56 0.012 60);
+  /* Lifted from 0.56 so the "stale/dropped" label text clears AA as small text. */
+  --stale: oklch(0.66 0.012 60);
   --danger: oklch(0.7 0.17 30);
 
   --glow: oklch(0.81 0.155 72 / 0.16);
@@ -35,6 +37,24 @@
   ::selection {
     background: var(--accent);
     color: var(--accent-ink);
+  }
+  /*
+   * Visible keyboard focus on every site control. Uses outline (no layout
+   * shift) and follows each element's own border-radius. The palette input
+   * keeps its neutral `outline-none` because Tailwind utilities outrank this
+   * base rule — the shipped component stays untouched.
+   */
+  :where(
+    a,
+    button,
+    input,
+    summary,
+    [role="tab"],
+    [role="radio"],
+    [tabindex]
+  ):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   /* Warm, low-key grid wash so the page reads as an instrument surface. */
   .bg-grid {

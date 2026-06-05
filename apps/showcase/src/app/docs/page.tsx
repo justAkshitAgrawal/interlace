@@ -1,4 +1,41 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { InstallCommand } from "@/components/install-command";
+import { CodeViewer, type SourceFile } from "@/components/code-viewer";
+
+/*
+ * Source is read from the registry artifact the CLI actually serves, so what's
+ * documented here is byte-identical to what `shadcn add` installs. Ordered so
+ * the styled view and the headless hook (the interesting parts) lead.
+ */
+const FILE_ORDER = [
+  "command-palette.tsx",
+  "use-command-palette.ts",
+  "types.ts",
+  "fuzzy.ts",
+  "motion.ts",
+  "command-list.tsx",
+];
+
+function loadSourceFiles(): SourceFile[] {
+  const registryPath = join(
+    process.cwd(),
+    "public",
+    "r",
+    "command-palette.json",
+  );
+  const registry = JSON.parse(readFileSync(registryPath, "utf8")) as {
+    files: SourceFile[];
+  };
+  const rank = (path: string) => {
+    const name = path.split("/").pop() ?? path;
+    const i = FILE_ORDER.indexOf(name);
+    return i === -1 ? FILE_ORDER.length : i;
+  };
+  return [...registry.files]
+    .map((f) => ({ path: f.path, content: f.content }))
+    .sort((a, b) => rank(a.path) - rank(b.path));
+}
 
 const PROPS: { name: string; type: string; desc: string }[] = [
   {
@@ -51,6 +88,7 @@ const PROPS: { name: string; type: string; desc: string }[] = [
 ];
 
 export default function Docs() {
+  const sourceFiles = loadSourceFiles();
   return (
     <main className="mx-auto max-w-3xl px-5 py-20 sm:px-8">
       <p className="font-mono text-xs text-accent">Install</p>
@@ -59,8 +97,8 @@ export default function Docs() {
       </h1>
       <p className="mt-3 max-w-xl text-pretty leading-relaxed text-muted">
         Interlace components install as source into your repo via the shadcn
-        CLI. You own the files and edit the styling freely. Requires React 19 and
-        Tailwind CSS.
+        CLI. You own the files and edit the styling freely. Requires React 19
+        and Tailwind CSS.
       </p>
       <div className="mt-7">
         <InstallCommand />
@@ -90,6 +128,16 @@ export default function Docs() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <h2 className="mt-16 text-2xl font-semibold tracking-tight">Source</h2>
+      <p className="mt-3 max-w-xl text-pretty leading-relaxed text-muted">
+        The exact files that land in your repo, read straight from the registry
+        the CLI installs from. No build step, no hidden runtime: this is what
+        you own.
+      </p>
+      <div className="mt-6">
+        <CodeViewer files={sourceFiles} />
       </div>
 
       <h2 className="mt-16 text-2xl font-semibold tracking-tight">

@@ -13,59 +13,92 @@ import { ScaleDemo } from "@/components/scale-demo";
 
 export default function Home() {
   const [open, setOpen] = useState(false);
+  const [heroOpen, setHeroOpen] = useState(true);
   const [recents, setRecents] = useState<string[]>([]);
+
+  const recordRecent = (id: string) =>
+    setRecents((prev) => [id, ...prev.filter((x) => x !== id)].slice(0, 5));
 
   return (
     <main>
-      {/* Hero — the differentiator leads, the inspector IS the hero. */}
+      {/* Hero — the claim on the left, the palette running live on the right. */}
       <section className="relative overflow-hidden">
         <div
           aria-hidden
-          className="bg-grid pointer-events-none absolute inset-0 h-[420px]"
+          className="bg-grid pointer-events-none absolute inset-0 h-[600px]"
         />
-        <div className="relative mx-auto max-w-6xl px-5 pb-4 pt-20 sm:px-8 sm:pt-28">
-          <h1 className="max-w-3xl text-balance font-semibold tracking-tight [font-size:clamp(2rem,6vw,3.75rem)] [line-height:1.04]">
-            Watch what a great command palette does that a bad one{" "}
-            <span className="text-accent">doesn&apos;t.</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted">
-            Async with race cancellation, every frozen state, the exact motion
-            timings. Most palettes hide this craft behind a pretty input. This
-            one puts it on the table so you can scrub it, break it, and inspect
-            it.
-          </p>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-8 pt-20 sm:px-8 sm:pt-28 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
+          <div>
+            <h1 className="max-w-2xl text-balance font-semibold tracking-tight [font-size:clamp(2rem,6vw,3.75rem)] [line-height:1.04]">
+              Watch what a great command palette does that a bad one{" "}
+              <span className="text-accent">doesn&apos;t.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted">
+              Async with race cancellation, every frozen state, the exact motion
+              timings. Most palettes hide this craft behind a pretty input. This
+              one puts it on the table so you can scrub it, break it, and
+              inspect it.
+            </p>
 
-          <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-ink transition-transform hover:-translate-y-px active:translate-y-0"
-            >
-              Open the palette
-              <kbd className="rounded bg-black/15 px-1.5 py-0.5 font-mono text-xs">
-                ⌘K
-              </kbd>
-            </button>
-            <InstallCommand />
+            <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-ink transition-transform hover:-translate-y-px active:translate-y-0"
+              >
+                Open the palette
+                <kbd className="rounded bg-black/15 px-1.5 py-0.5 font-mono text-xs">
+                  ⌘K
+                </kbd>
+              </button>
+              <InstallCommand />
+            </div>
+            <p className="mt-4 font-mono text-xs text-faint">
+              Free. Copy-paste React source you own, via the shadcn CLI.
+            </p>
           </div>
-          <p className="mt-4 font-mono text-xs text-faint">
-            Free. Copy-paste React source you own, via the shadcn CLI.
-          </p>
+
+          {/* The argument, running. A live palette in the first viewport, the
+              "interaction not a screenshot" energy applied to itself. */}
+          <div className="palette-frame relative min-h-[420px] transform-gpu overflow-hidden rounded-xl border border-line bg-zinc-950/50 shadow-glow lg:min-h-[460px]">
+            <CommandPalette
+              commands={demoCommands}
+              groups={demoGroups}
+              open={heroOpen}
+              onOpenChange={setHeroOpen}
+              disableShortcut
+              recents={recents}
+              onSelectCommand={recordRecent}
+              placeholder="Type a command or search…"
+            />
+            {!heroOpen && (
+              <button
+                type="button"
+                onClick={() => setHeroOpen(true)}
+                className="absolute inset-0 grid place-items-center text-sm text-muted hover:text-ink"
+              >
+                Re-open palette
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* The signature artifact. */}
+      {/* The signature artifact — elevated into a full-bleed feature band so it
+          reads as the centerpiece, not another section in the stack. */}
       <section
         id="studio"
-        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-12 sm:px-8"
+        className="scroll-mt-20 border-y border-line bg-surface/30 py-14 sm:py-20"
       >
-        <SectionLabel
-          kicker="Live demo · scrub it"
-          title="The async race, in slow motion"
-          body="Type fast and two requests overlap. Scrub the timeline, then flip to a naive palette to watch the stale one win."
-        />
-        <div className="mt-7">
-          <RaceTimeline />
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <SectionLabel
+            kicker="Live demo · scrub it"
+            title="The async race, in slow motion"
+            body="Type fast and two requests overlap. Scrub the timeline, then flip to a naive palette to watch the stale one win."
+          />
+          <div className="mt-7">
+            <RaceTimeline />
+          </div>
         </div>
       </section>
 
@@ -84,7 +117,7 @@ export default function Home() {
       {/* Recents + shortcut hints. */}
       <section
         id="recents"
-        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8"
+        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-20 sm:px-8"
       >
         <SectionLabel
           kicker="Recents · shortcut hints"
@@ -96,23 +129,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Frozen states. */}
+      {/* Frozen states — the playground core, raised into its own band. */}
       <section
         id="states"
-        className="mx-auto max-w-6xl scroll-mt-20 px-5 pt-24 sm:px-8"
+        className="mt-24 scroll-mt-20 border-y border-line bg-surface/30 py-14 sm:py-20"
       >
-        <SectionLabel
-          kicker="6 states · frozen"
-          title="The states that flash by too fast to see"
-          body="Loading, empty, error, no-results. Every palette has them; almost none are designed. Freeze each one and stare."
-        />
-        <div className="mt-7">
-          <StateInspector />
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <SectionLabel
+            kicker="6 states · frozen"
+            title="The states that flash by too fast to see"
+            body="Loading, empty, error, no-results. Every palette has them; almost none are designed. Freeze each one and stare."
+          />
+          <div className="mt-7">
+            <StateInspector />
+          </div>
         </div>
       </section>
 
       {/* Motion tokens. */}
-      <section className="mx-auto max-w-6xl px-5 pt-24 sm:px-8">
+      <section className="mx-auto max-w-6xl px-5 pt-20 sm:px-8">
         <SectionLabel
           kicker="Straight from motion.ts"
           title="The timings you normally only feel"
@@ -157,11 +192,7 @@ export default function Home() {
         open={open}
         onOpenChange={setOpen}
         recents={recents}
-        onSelectCommand={(id) =>
-          setRecents((prev) =>
-            [id, ...prev.filter((x) => x !== id)].slice(0, 5),
-          )
-        }
+        onSelectCommand={recordRecent}
       />
     </main>
   );

@@ -16,11 +16,28 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+const TITLE =
+  "Interlace: watch what a great command palette does that a bad one doesn't";
+const DESCRIPTION =
+  "Drop-in interactions for real software. The first is a best-in-class, copy-paste command palette for React — async with race cancellation, nested pages, accessible. See the dropped requests and frozen states most palettes hide. Free.";
+
 export const metadata: Metadata = {
-  title:
-    "Interlace: watch what a great command palette does that a bad one doesn't",
-  description:
-    "Drop-in interactions for real software. The first is a best-in-class, copy-paste command palette for React — async with race cancellation, nested pages, accessible. See the dropped requests and frozen states most palettes hide. Free.",
+  metadataBase: new URL("https://interlace.akshitagrawal.dev"),
+  title: TITLE,
+  description: DESCRIPTION,
+  applicationName: "Interlace",
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "Interlace",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
